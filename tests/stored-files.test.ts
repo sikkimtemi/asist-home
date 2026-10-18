@@ -8,6 +8,7 @@ import { openStoredContent, storedContent, type StoredFormat } from '@shared/sto
 import { SETTINGS_FORMAT } from '@shared/settings'
 import { TASKS_FORMAT } from '@shared/tasks'
 import { TIMERS_FORMAT } from '@shared/timer-manager'
+import { CALENDAR_REMINDERS_FORMAT } from '@shared/calendar-reminders'
 import { secretFileFormat } from '../src/main/services/encrypted-secrets'
 import { DRAFTS_FORMAT } from '../src/main/services/mail-drafts'
 import { JOBS_FORMAT } from '../src/main/services/job-history'
@@ -28,6 +29,7 @@ const FORMATS: StoredFormat<unknown>[] = [
   SETTINGS_FORMAT,
   TASKS_FORMAT,
   TIMERS_FORMAT,
+  CALENDAR_REMINDERS_FORMAT,
   secretFileFormat('api-keys.json', () => 'broken'),
   secretFileFormat('google-calendar.json', () => 'broken'),
   secretFileFormat('chatgpt.json', () => 'broken'),

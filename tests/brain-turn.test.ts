@@ -349,6 +349,42 @@ describe('brain turn', () => {
     mocks.settingsService = null
   })
 
+  it('runs a scheduled request through the conversation LLM and TTS while separating its UI label and log origin', async () => {
+    mocks.rounds.push(async (round) => {
+      round.text('17時半からAさんの塾、19時半からBさんの塾の予定です。')
+      return {}
+    })
+    const { events } = await loadBrain()
+    const { dispatchCalendarReminder } = await import('../src/main/services/brain/calendar-reminder')
+    const { turnScheduler } = await import('../src/main/services/brain/session')
+    const { toCalendarEvent } = await import('../src/main/services/google-calendar')
+    const calendar = { id: 'family', title: '家族', writable: true, timeZone: 'Asia/Tokyo' }
+    const one = (id: string, title: string, hour: string) => toCalendarEvent({ id, etag: id, summary: title, start: { dateTime: '2026-10-18T' + hour + ':00+09:00' }, end: { dateTime: '2026-10-18T23:00:00+09:00' } }, calendar)
+    dispatchCalendarReminder([one('a', 'Aの塾', '17:30'), one('b', 'Bの塾', '19:30')], Date.parse('2026-10-18T17:00:00+09:00'))
+    await turnScheduler.waitForIdle()
+    expect(mocks.requests).toHaveLength(1)
+    expect(mocks.requests[0].tools).toEqual([])
+    expect(textOf(mocks.requests[0].messages.at(-1)!)).toContain('Aの塾')
+    expect(textOf(mocks.requests[0].messages.at(-1)!)).toContain('Bの塾')
+    expect(JSON.stringify(mocks.requests[0])).not.toContain(createTranslator('ja-JP')('calendarReminders.automatic'))
+    expect(mocks.voiceLocales).toEqual(['ja-JP'])
+    expect(events).toContainEqual(expect.objectContaining({ type: 'started', origin: 'interject', schedulerInput: createTranslator('ja-JP')('spoken.calendarReminderRequest') }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'segment', segment: expect.objectContaining({ text: '17時半からAさんの塾、19時半からBさんの塾の予定です。' }) }))
+    const logs = fs.readdirSync(path.join(mocks.userData, 'conversations')).filter((name) => name.endsWith('.jsonl')).flatMap((name) => fs.readFileSync(path.join(mocks.userData, 'conversations', name), 'utf8').trim().split('\n').map((line) => JSON.parse(line)))
+    expect(logs).toContainEqual(expect.objectContaining({ kind: 'notice', notice: 'calendar-reminder' }))
+    expect(logs.some((record) => record.kind === 'user')).toBe(false)
+  })
+
+  it('refuses tool execution during a scheduled announcement even if a model emits a tool call', async () => {
+    mocks.rounds.push(async (round) => { round.toolUse('unexpected', 'show_weather', { place: 'Tokyo' }); return { stop: 'tool_use' } })
+    mocks.rounds.push(async (round) => { round.text('予定をお知らせします。'); return {} })
+    const { brain } = await loadBrain()
+    await brain.beginTurn({ notice: 'calendar-reminder', text: '予定データ' }, {}, 'interject', true)!.completion
+    expect(mocks.requests.every((request) => Array.isArray(request.tools) && request.tools.length === 0)).toBe(true)
+    expect(mocks.fetchPanel).not.toHaveBeenCalled()
+    expect(mocks.requests[1].messages.flatMap((message) => message.parts)).toContainEqual(expect.objectContaining({ type: 'tool_result', isError: true }))
+  })
+
   it('speaks the reply of a normal turn, keeps it in the history and the conversation log, and reports usage in metrics', async () => {
     mocks.rounds.push(async (round) => {
       round.text('明日は', '晴天です。')

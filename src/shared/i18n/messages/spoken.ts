@@ -86,5 +86,18 @@ export const spoken = defineMessages({
       'es-419': 'Resúmeme esta noticia: {title}',
       'es-ES': 'Resúmeme esta noticia: {title}'
     }
+  },
+  calendarReminderRequest: {
+    'ja-JP': '本日これから始まる予定を知らせてください。',
+    'en-US': 'Please announce the events still to start today.',
+    'fr-FR': 'Annonce les événements qui doivent encore commencer aujourd’hui.',
+    'de-DE': 'Bitte kündige die heute noch beginnenden Termine an.',
+    'hi-IN': 'कृपया आज के बाकी आगामी कार्यक्रम सुनाएँ।',
+    'id-ID': 'Tolong umumkan acara yang belum dimulai hari ini.',
+    'it-IT': 'Annuncia gli eventi che devono ancora iniziare oggi.',
+    'ko-KR': '오늘 앞으로 시작할 일정을 알려 주세요.',
+    'pt-BR': 'Anuncie os eventos que ainda vão começar hoje.',
+    'es-419': 'Anuncia los eventos que aún no empiezan hoy.',
+    'es-ES': 'Anuncia los eventos que aún no han empezado hoy.'
   }
 })

@@ -143,7 +143,7 @@ export const useLiveStore = create<LiveState>((set) => ({
  * A line of the interface that is drawn from the dictionary each time, so that it follows a change of the language.
  * The message of an error is kept as it was thrown, key and all, and worded when the line is drawn.
  */
-export type FeedMessage = { key: 'conversation.start' } | { key: 'conversation.error'; values: { message: string } }
+export type FeedMessage = { key: 'conversation.start' | 'calendarReminders.missed' } | { key: 'conversation.error'; values: { message: string } }
 
 export interface FeedLine {
   id: number
@@ -154,6 +154,7 @@ export interface FeedLine {
   chip?: string
   turnId?: number
   streaming?: boolean
+  scheduler?: boolean
 }
 
 interface FeedState {

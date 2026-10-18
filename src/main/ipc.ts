@@ -1,5 +1,6 @@
 import { shouldPushJobCard } from '@shared/job-cards'
 import { calendarStatus, changeCalendar, listCalendar, requestCalendarAccess, signOutCalendar } from './services/calendar'
+import { acknowledgeMissedCalendarReminders, calendarReminderEvents, calendarReminderStatus, pauseCalendarReminders, refreshCalendarReminders, startCalendarReminders } from './services/calendar-reminders'
 import { events as mailEvents, getMailService, openMailGuide } from './services/mail'
 import { confirmEvents, pendingConfirms, resolveConfirm } from './services/confirm'
 import { app, dialog, ipcMain, shell, type BrowserWindow } from 'electron'
@@ -157,6 +158,7 @@ export function registerIpc(window: BrowserWindow, appPage: string): void {
     } satisfies PanelEvent)
   })
   timers.events.on('event', (event) => send(IpcChannel.TimerEvent, event))
+  calendarReminderEvents.on('changed', (status) => send(IpcChannel.CalendarReminderChanged, status))
   noteEvents.on('changed', (changes) => send(IpcChannel.NotesChanged, changes))
   taskEvents.on('changed', (tasks) => send(IpcChannel.TasksChanged, tasks))
   mailEvents.on('event', (event) => send(IpcChannel.MailEvent, event))
@@ -460,8 +462,22 @@ export function registerIpc(window: BrowserWindow, appPage: string): void {
   handle(IpcChannel.JobLog, (_e, id: string) => agent.getLog(id))
 
   handle(IpcChannel.CalendarStatus, () => calendarStatus())
-  handle(IpcChannel.CalendarRequestAccess, () => requestCalendarAccess())
-  handle(IpcChannel.CalendarSignOut, () => signOutCalendar())
+  handle(IpcChannel.CalendarReminderStart, () => startCalendarReminders())
+  handle(IpcChannel.CalendarReminderStatus, () => calendarReminderStatus())
+  handle(IpcChannel.CalendarReminderAcknowledge, () => acknowledgeMissedCalendarReminders())
+  handle(IpcChannel.CalendarRequestAccess, async () => {
+    const result = await requestCalendarAccess()
+    refreshCalendarReminders()
+    return result
+  })
+  handle(IpcChannel.CalendarSignOut, async () => {
+    pauseCalendarReminders()
+    try {
+      return await signOutCalendar()
+    } finally {
+      refreshCalendarReminders()
+    }
+  })
   handle(IpcChannel.CalendarEvents, (_e, range: unknown) => listCalendar(range))
   // An add, edit or delete from the screen takes the same path as the agent's and is saved only after the
   // in-app confirmation is approved.
@@ -525,6 +541,7 @@ export function registerIpc(window: BrowserWindow, appPage: string): void {
       }
 
       const after = saveSettings(patch)
+      if (JSON.stringify(before.calendar) !== JSON.stringify(after.calendar) || JSON.stringify(before.calendarReminders) !== JSON.stringify(after.calendarReminders)) refreshCalendarReminders()
       if (stopsLiveEngine(before, after)) {
         void live.stop().catch((error) => console.error('live stop failed:', error))
       }

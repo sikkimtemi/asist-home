@@ -70,6 +70,7 @@ const Line = memo(function Line({
   dim: number
   karaoke: Karaoke
 }): React.JSX.Element {
+  const t = useT()
   if (line.role === 'sys') return <SystemLine line={line} />
   const isUser = line.role === 'user'
   return (
@@ -79,7 +80,7 @@ const Line = memo(function Line({
     >
       <div className="flex items-center gap-2 font-mono text-[9px] tracking-[0.3em]">
         <b className={isUser ? 'font-medium text-holo-cyan' : 'font-medium text-holo-peach'}>
-          {isUser ? '▲ YOU' : '● ASIST'}
+          {line.scheduler ? t('calendarReminders.automatic') : isUser ? '▲ YOU' : '● ASIST'}
         </b>
         {line.chip && <span className="text-holo-mint">{line.chip}</span>}
         {line.streaming && (

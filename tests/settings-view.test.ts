@@ -212,6 +212,18 @@ const pendingLabels = (view: HTMLElement): Array<string | null | undefined> =>
   [...view.querySelectorAll('[data-pending] .st-row-label')].map((label) => label.textContent)
 
 describe('settings dialog', () => {
+  it.each([60, 90, 1800])('edits the polling interval in minutes while preserving a stored duration of %i seconds', async (pollSeconds) => {
+    const reminders = { ...settings.calendarReminders, pollSeconds }
+    useSettingsStore.setState({ settings: { ...settings, calendarReminders: reminders } })
+    const view = await render()
+    await act(async () => nav(view, 'connections').click())
+    const field = view.querySelector<HTMLInputElement>('input[aria-label="' + t('calendarReminders.pollMinutes') + '"]')!
+    expect(field.value).toBe(String(pollSeconds / 60))
+    await act(async () => type(field, '2.5'))
+    await act(async () => leave(field))
+    expect(api.saveSettings.mock.calls).toEqual([[{ calendarReminders: { ...reminders, pollSeconds: 150 } }]])
+  })
+
   it('opens on the overview and lists the pages in order under their headings, each with its summary line', async () => {
     const view = await render()
     expect(title(view)).toBe(t('settings.pages.overview'))

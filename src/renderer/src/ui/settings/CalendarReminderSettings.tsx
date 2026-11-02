@@ -35,25 +35,25 @@ export function CalendarReminderSettings({ settings }: { settings: AppSettings }
         <HoloSwitch aria-label={t('calendarReminders.enable')} checked={reminders.enabled} disabled={busy || (!settings.calendar.enabled && !reminders.enabled)} onCheckedChange={(enabled) => void persist({ enabled })} />
       </Row>
       <ReminderNumber key={'lead-' + reminders.leadMinutes} label={t('calendarReminders.leadMinutes')} value={reminders.leadMinutes} min={1} max={1440} disabled={busy} save={(leadMinutes) => persist({ leadMinutes })} />
-      <ReminderNumber key={'poll-' + reminders.pollSeconds} label={t('calendarReminders.pollSeconds')} hint={t('calendarReminders.pollHint')} value={reminders.pollSeconds} min={60} max={86400} disabled={busy} save={(pollSeconds) => persist({ pollSeconds })} />
+      <ReminderNumber key={'poll-' + reminders.pollSeconds} label={t('calendarReminders.pollMinutes')} value={reminders.pollSeconds / 60} min={1} max={1440} step="any" disabled={busy} save={(pollMinutes) => persist({ pollSeconds: Math.round(pollMinutes * 60) })} />
       {error && <Row label={t('calendarReminders.error')} hint={<span role="alert">{error}</span>} />}
     </Group>
   )
 }
 
-function ReminderNumber({ label, hint, value, min, max, disabled, save }: {
+function ReminderNumber({ label, value, min, max, step = 1, disabled, save }: {
   label: string
-  hint?: string
   value: number
   min: number
   max: number
+  step?: number | 'any'
   disabled: boolean
   save: (value: number) => Promise<void>
 }): React.JSX.Element {
   const [draft, setDraft] = useState(String(value))
   return (
-    <Row label={label} hint={hint}>
-      <input className="st-input" type="number" aria-label={label} min={min} max={max} step={1} value={draft} disabled={disabled} onChange={(event) => setDraft(event.target.value)} onBlur={(event) => {
+    <Row label={label}>
+      <input className="st-input" type="number" aria-label={label} min={min} max={max} step={step} value={draft} disabled={disabled} onChange={(event) => setDraft(event.target.value)} onBlur={(event) => {
         if (event.target.validity.valid && draft !== '' && Number(draft) !== value) void save(Number(draft))
         else setDraft(String(value))
       }} />

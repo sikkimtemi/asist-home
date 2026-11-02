@@ -10,8 +10,8 @@ export const calendarReminderSettingsSchema = z.strictObject({
   pollSeconds: z.number().int().min(60).max(86400)
 })
 export type CalendarReminderSettings = z.infer<typeof calendarReminderSettingsSchema>
-/** The development default favors quick validation; daily operation uses a separately configured interval. */
-export const DEFAULT_CALENDAR_REMINDERS: CalendarReminderSettings = { enabled: false, leadMinutes: 30, pollSeconds: 60 }
+/** Background calendar reads require an explicit opt-in. */
+export const DEFAULT_CALENDAR_REMINDERS: CalendarReminderSettings = { enabled: false, leadMinutes: 30, pollSeconds: 1800 }
 
 const receiptSchema = z.strictObject({
   key: z.string(),

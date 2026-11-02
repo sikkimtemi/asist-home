@@ -15,7 +15,7 @@ Writes, whether from the conversation or from the screen, happen after you appro
 
 ## Spoken calendar reminders
 
-Under Calendar and mail in settings, enable "Spoken calendar reminders" to periodically read the calendars selected for display. Select your family calendar for family reminders. "Minutes before the event" defaults to 30 and accepts 1–1440 minutes. Set "Refresh interval (seconds)" to 60 during development and 1800 (30 minutes) for daily use. Events already fetched are scheduled independently of the refresh interval. Additions, changes and cancellations take effect after the next refresh.
+Under Calendar and mail in settings, enable "Spoken calendar reminders" to periodically read the calendars selected for display. Select your family calendar for family reminders. "Minutes before the event" and "Refresh interval (minutes)" both default to 30 and accept 1–1440 minutes. Events already fetched are scheduled independently of the refresh interval. Additions, changes and cancellations take effect after the next refresh.
 
 Each reminder announces every timed event still to start today, including events later than the one that triggered it. With A's lesson at 17:30 and B's lesson at 19:30, the announcement at 17:00 includes both; the one at 19:00 includes only B's lesson. All-day events and events already started are excluded. Reminders due together share one announcement.
 

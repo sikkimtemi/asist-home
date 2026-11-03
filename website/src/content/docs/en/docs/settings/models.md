@@ -11,6 +11,8 @@ Save an API key for each provider on the "API keys" page. When the provider of a
 
 "ChatGPT" works with a sign-in with ChatGPT instead of an API key. You sign in in the "ChatGPT" row of the same "API keys" page, and conversations count towards your ChatGPT plan's usage. See [Using your ChatGPT plan](/en/docs/start/chatgpt/).
 
+OpenAI and ChatGPT default to GPT-6.1 Terra for conversation and GPT-6 Luna for bridge phrases. These defaults apply during first-run setup and when you switch a model's provider. Updates preserve your saved choices. Terra is chosen for clear writing and efficiency, and the lightweight Luna for short bridge phrases. GPT-6.1 Sol is another option for complex questions. These choices are not based on a response-time comparison in ASIST, so compare the answers and waiting time in your own conversations.
+
 Next to the model, you can choose the depth of thinking. The default is the shallowest setting, so that a voice conversation doesn't keep you waiting. With a deeper setting, it can take more than ten seconds before the answer starts.
 
 Web search uses the provider's built-in search, so it isn't available with Cerebras models, which have no built-in search. The conversation history is stored in a form that doesn't depend on the provider, so the conversation carries on even if you switch models partway through.

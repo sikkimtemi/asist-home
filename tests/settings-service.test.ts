@@ -41,6 +41,18 @@ afterEach(() => {
 })
 
 describe('settings persistence', () => {
+  it.each(['gpt-5.6-terra', 'gpt-6.1-sol'])('keeps saved %s and its reasoning effort across reloads and unrelated edits', async (id) => {
+    const model = { provider: 'chatgpt' as const, id, effort: 'high' as const }
+    const { saveSettings } = await import('../src/main/services/settings')
+    saveSettings({ conversationModel: model, bridgeModel: { provider: 'chatgpt', id: 'gpt-5.6-luna' } })
+    vi.resetModules()
+    const reloaded = await import('../src/main/services/settings')
+    expect(reloaded.getSettings().conversationModel).toEqual(model)
+    expect(reloaded.saveSettings({ hangoverMs: 700 })).toMatchObject({
+      conversationModel: model, bridgeModel: { provider: 'chatgpt', id: 'gpt-5.6-luna' }
+    })
+  })
+
   it('defaults a fresh install to the auto ASR model, which follows the installed memory', async () => {
     const settings = await import('../src/main/services/settings')
 

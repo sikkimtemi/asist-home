@@ -129,7 +129,7 @@ export const CREDITS = [
   {
     id: 'openai',
     group: 'api',
-    name: 'GPT-5.6 Luna, GPT-5.6 Terra, GPT-5.6 Sol',
+    name: 'GPT-5.6 Luna, GPT-5.6 Terra, GPT-5.6 Sol, GPT-6 Luna, GPT-6 Sol, GPT-6 Astra, GPT-6.1 Terra, GPT-6.1 Sol',
     provider: 'OpenAI',
     license: null,
     url: 'https://openai.com/policies/'

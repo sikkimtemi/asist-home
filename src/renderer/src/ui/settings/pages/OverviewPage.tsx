@@ -32,13 +32,13 @@ interface Step {
 export function OverviewPage({ ctx }: { ctx: SettingsContext }): React.JSX.Element {
   const { settings, status, setup, vap, embedding, aizuchiClassifier, pending: todo, prepare, set, go } = ctx
   const t = useT()
-  const { localSpeech, os } = platformCapabilities()
+  const { localAsr, localTts, os } = platformCapabilities()
   const features = conversationFeatures(settings.conversationLocale)
   const live = isLiveEngine(settings.voiceEngine) ? settings.voiceEngine : null
   const liveSettings = live ? settings.geminiLive : null
   const conversation = settings.conversationModel
-  const listening = cascadeListeningReady(settings, status, localSpeech)
-  const speech = speechReadiness(settings.ttsEngine, status, localSpeech)
+  const listening = cascadeListeningReady(settings, status, localAsr)
+  const speech = speechReadiness(settings.ttsEngine, status, localTts)
   const asrModel = statusOf(setup)?.asr ?? null
   const vapRead = statusOf(vap)
   const embeddingRead = statusOf(embedding)
@@ -71,7 +71,7 @@ export function OverviewPage({ ctx }: { ctx: SettingsContext }): React.JSX.Eleme
           title: t('settingsModels.asr.title'),
           // What listens now: the local model once it answers, and Whisper in the browser in its place until then.
           value:
-            localSpeech.backend !== null && ((status !== null && speechEnginePrepared(status.asr)) || !settings.localAsrEnabled)
+            localAsr.backend !== null && ((status !== null && speechEnginePrepared(status.asr)) || !settings.localAsrEnabled)
               ? (asrModel?.label ?? (readFailure(setup) === null ? '…' : t('settingsModels.checkFailed')))
               : t('settingsModels.asr.browserWhisper'),
           chip: listening === null ? checking : listening ? ready : notReady
@@ -104,7 +104,7 @@ export function OverviewPage({ ctx }: { ctx: SettingsContext }): React.JSX.Eleme
       case 'browserWhisper':
         return {
           label: t('settingsModels.asr.browserWhisper'),
-          hint: localSpeech.backend === null ? t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localSpeech.reason]) : '',
+          hint: localAsr.backend === null ? t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localAsr.reason]) : '',
           action: <WhisperControl ctx={ctx} />
         }
       case 'speech': {
@@ -177,7 +177,7 @@ export function OverviewPage({ ctx }: { ctx: SettingsContext }): React.JSX.Eleme
   const optional = [
     ...(settings.memoryEmbeddingEnabled ? [] : ['semanticSearch' as const]),
     ...(!live && features.maai && !settings.vapEnabled ? ['turnTaking' as const] : []),
-    ...(!live && localSpeech.backend !== null && !settings.localAsrEnabled ? ['browserWhisper' as const] : [])
+    ...(!live && localAsr.backend !== null && !settings.localAsrEnabled ? ['browserWhisper' as const] : [])
   ]
 
   return (

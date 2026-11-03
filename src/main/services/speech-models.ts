@@ -117,6 +117,7 @@ export async function removeUnpinnedFiles(pinned: readonly PinnedFile[]): Promis
 }
 
 export interface PrepareOptions {
+  task: 'asr' | 'tts'
   files: readonly PinnedFile[]
   /** The model's name in the messages. */
   label: string
@@ -137,10 +138,9 @@ export interface PrepareOptions {
  * has no time limit, because the service's ready timeout would otherwise have to cover 2.5 GB on a slow line.
  */
 export async function prepareModelFiles(options: PrepareOptions): Promise<{ ok: boolean; message: string }> {
-  const { files, label, feature, signal, onProgress, selected, start } = options
-  if (platformCapabilities().localSpeech.backend === null) {
-    return { ok: false, message: t('settingsModels.preparation.unsupported', { feature }) }
-  }
+  const { task, files, label, feature, signal, onProgress, selected, start } = options
+  const capability = task === 'asr' ? platformCapabilities().localAsr : platformCapabilities().localTts
+  if (capability.backend === null) return { ok: false, message: t('settingsModels.preparation.unsupported', { feature }) }
   try {
     if (!filesInstalled(files)) {
       const message = t('settingsModels.preparation.downloading', { model: label })

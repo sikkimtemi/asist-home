@@ -6,7 +6,7 @@ import { asrModelFiles, asrModelSpec, recommendAsrModel } from '@shared/asr-mode
 import type { AppSettings } from '@shared/ipc'
 import type { PinnedFile } from '@shared/pinned-file'
 import { localTtsModel } from '@shared/tts-models'
-import { MACOS, WINDOWS_WITHOUT_GPU, setCapabilities } from './helpers/platform'
+import { MACOS, WINDOWS_WITHOUT_GPU, WINDOWS_INTEGRATED, setCapabilities } from './helpers/platform'
 import { SPEECH_MODELS_OUTPUT, TEST_SPEECH_CATALOG } from './helpers/speech-catalog'
 
 const mocks = vi.hoisted(() => ({
@@ -48,6 +48,13 @@ afterEach(() => {
 })
 
 describe('telling the user once about the local speech models that need preparing', () => {
+  it('notifies once about Haas on integrated graphics without asking to prepare unavailable synthesis', () => {
+    setCapabilities(WINDOWS_INTEGRATED)
+    mocks.settings.asrModel = 'haas-ja-v1.0'
+    const spec = asrModelSpec('haas-ja-v1.0')
+    expect(takeSpeechModelNotices()).toEqual([{ target: 'asr', label: spec.label, downloadBytes: bytesOf(asrModelFiles(spec, TEST_SPEECH_CATALOG)) }])
+    expect(takeSpeechModelNotices()).toEqual([])
+  })
   it('tells about the reading model whose files are missing, with what preparing it downloads, and not a second time', () => {
     install(asrModelFiles(RECOGNITION, TEST_SPEECH_CATALOG))
     expect(takeSpeechModelNotices()).toEqual([{ target: 'tts', label: IRODORI.label, downloadBytes: bytesOf(IRODORI.files) }])

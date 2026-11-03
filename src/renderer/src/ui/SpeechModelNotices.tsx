@@ -78,7 +78,7 @@ function noticeToast(notice: SpeechModelNotice): Omit<Toast, 'id'> {
 
 const stillInUse = (notice: SpeechModelNotice, settings: AppSettings | null): boolean =>
   settings !== null &&
-  localSpeechModelsInUse(settings, platformCapabilities().localSpeech, speechCatalog()).some((model) => model.target === notice.target && model.label === notice.label)
+  localSpeechModelsInUse(settings, platformCapabilities(), speechCatalog()).some((model) => model.target === notice.target && model.label === notice.label)
 
 /** Brings each toast in line with the state, and returns the notices still shown. */
 function followState(shown: Array<{ toast: number; notice: SpeechModelNotice }>): Array<{ toast: number; notice: SpeechModelNotice }> {

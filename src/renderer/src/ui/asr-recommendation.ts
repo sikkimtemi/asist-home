@@ -1,7 +1,7 @@
 import { asrModelSpec, asrRecommendationSize, type AsrModelChoice } from '@shared/asr-models'
 import type { SetupStatus } from '@shared/ipc'
 import type { Translate } from '@shared/i18n'
-import type { SpeechBackend } from '@shared/platform'
+import type { LocalSpeechCapability } from '@shared/platform'
 
 type AsrStatus = NonNullable<SetupStatus['asr']>
 
@@ -13,9 +13,11 @@ export const usesRecommendedAsr = (asr: AsrStatus): boolean => asr.resolvedModel
  * memory the main process reports (the Mac's own on metal, the GPU's on vulkan), and otherwise which model is
  * recommended.
  */
-export function asrChoiceReason(t: Translate, backend: SpeechBackend, asr: AsrStatus): string {
+export function asrChoiceReason(t: Translate, capability: Extract<LocalSpeechCapability, { memoryGb: number }>, asr: AsrStatus): string {
   if (!usesRecommendedAsr(asr)) return t('speechRecognition.recommendedForThisComputer', { model: asrModelSpec(asr.recommendedModel).label })
-  return t(`speechRecognition.recommendation.${backend}.${asrRecommendationSize(backend, asr.totalMemoryGb)}`, { memoryGb: asr.totalMemoryGb })
+  const { backend, memoryType } = capability
+  if (backend === 'vulkan' && memoryType === 'shared') return t('speechRecognition.recommendation.sharedGpu')
+  return t(`speechRecognition.recommendation.${backend}.${asrRecommendationSize(backend, asr.totalMemoryGb, memoryType)}`, { memoryGb: asr.totalMemoryGb })
 }
 
 /** A model as the setup and the voice page list it, with what preparing it downloads. */

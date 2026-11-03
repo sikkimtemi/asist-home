@@ -172,7 +172,7 @@ export function SetupWizard(): React.JSX.Element | null {
    */
   const chooseLocale = (next: ConversationLocale): void => {
     setError('')
-    const engine = next === settings.conversationLocale ? {} : { ttsEngine: defaultTtsEngine(next, capabilities.localSpeech) }
+    const engine = next === settings.conversationLocale ? {} : { ttsEngine: defaultTtsEngine(next, capabilities.localTts) }
     const recognition = asrModelRecognizes(next, settings.asrModel) ? {} : { asrModel: 'auto' as const }
     void saveSettings({ uiLocale: next, conversationLocale: next, region: defaultRegion(next), ...engine, ...recognition })
       .then(() => refresh())
@@ -413,7 +413,7 @@ export function SetupWizard(): React.JSX.Element | null {
     if (step === 'tts') {
       if (ttsReady) return t('setup.guide.tts.ready')
       // A saved engine this machine cannot run is offered by no choice on the screen, so it is chosen again.
-      if (!ttsEngineRuns(settings.ttsEngine, capabilities.localSpeech)) return t('setup.guide.tts.choose')
+      if (!ttsEngineRuns(settings.ttsEngine, capabilities.localTts)) return t('setup.guide.tts.choose')
       if (isLocalTtsEngine(settings.ttsEngine)) return ttsChecking ? ttsDownload?.message || t('common.preparing') : t(osMessageKey('setup.guide.tts.prepareOrSystem', capabilities.os))
       return ttsChecking ? t('setup.guide.tts.verifying') : t(osMessageKey('setup.guide.tts.notConnected', capabilities.os), { engine: services?.ttsLabel ?? t('setup.steps.tts.title') })
     }
@@ -497,7 +497,7 @@ export function SetupWizard(): React.JSX.Element | null {
           {step === 'listening' && (
             <ListeningStep
               locale={locale}
-              localSpeech={capabilities.localSpeech}
+              localAsr={capabilities.localAsr}
               choice={listening}
               onChoice={setListening}
               setup={setup}
@@ -532,7 +532,7 @@ export function SetupWizard(): React.JSX.Element | null {
               }}
               ttsChecking={ttsChecking}
               ttsDownload={ttsDownload}
-              localTtsOffered={recommendLocalTts(capabilities.localSpeech) || (localTtsRuns(capabilities.localSpeech) && isLocalTtsEngine(settings.ttsEngine))}
+              localTtsOffered={recommendLocalTts(capabilities.localTts) || (localTtsRuns(capabilities.localTts) && isLocalTtsEngine(settings.ttsEngine))}
               qwenTtsSize={settings.qwenTtsSize}
               onRecheckTts={() => void verifyTts()}
               onPrepareTts={() => void prepareTts()}

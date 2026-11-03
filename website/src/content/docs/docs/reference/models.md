@@ -11,10 +11,11 @@ sidebar:
 
 | 用途 | モデル | 取得元 | ライセンス |
 |---|---|---|---|
-| 音声認識(メモリが 16GB 以上の Mac と、GPU のメモリが 6GB 以上の Windows で勧める) | Qwen3-ASR 1.7B(GGUF、Q8_0) | `sakasegawa/Qwen3-ASR-1.7B-GGUF`(Qwen が公開したモデルを変換したもの) | Apache-2.0 |
-| 音声認識(それより少ないときに勧める) | Qwen3-ASR 0.6B(GGUF、Q8_0) | `sakasegawa/Qwen3-ASR-0.6B-GGUF`(Qwen が公開したモデルを変換したもの) | Apache-2.0 |
-| 音声認識(日本語、選んだときだけ) | parakeet-tdt_ctc-0.6b-ja(GGUF、F16) | `sakasegawa/parakeet-tdt_ctc-0.6b-ja-GGUF`(NVIDIA が公開したモデルを変換したもの) | CC BY 4.0 |
-| 音声認識(日本語、選んだときだけ) | ReazonSpeech NeMo v2(GGUF、F16) | `sakasegawa/reazonspeech-nemo-v2-GGUF`(Reazon Human Interaction Lab が公開した reazonspeech-nemo-v2 を変換したもの) | Apache-2.0 |
+| 音声認識(メモリが 16GB 以上の Mac と、単体 GPU のメモリが 6GB 以上の Windows で勧める) | Qwen3-ASR 1.7B(GGUF、Q8_0) | `sakasegawa/Qwen3-ASR-1.7B-GGUF`(Qwen が公開したモデルを変換したもの) | Apache-2.0 |
+| 音声認識(それより少ないとき、または Windows の内蔵 GPU で勧める) | Qwen3-ASR 0.6B(GGUF、Q8_0) | `sakasegawa/Qwen3-ASR-0.6B-GGUF`(Qwen が公開したモデルを変換したもの) | Apache-2.0 |
+| 音声認識(日本語、選んだときだけ) | Haas-ja-v1.0(GGUF、Q8_0) | `sakasegawa/Haas-ja-v1.0-GGUF`(Third Intelligence が公開したモデルを変換したもの) | Apache-2.0 |
+| 音声認識(日本語、選んだときだけ) | parakeet-tdt_ctc-0.6b-ja(GGUF、Q8_0) | `sakasegawa/parakeet-tdt_ctc-0.6b-ja-GGUF`(NVIDIA が公開したモデルを変換したもの) | CC BY 4.0 |
+| 音声認識(日本語、選んだときだけ) | ReazonSpeech NeMo v2(GGUF、Q8_0) | `sakasegawa/reazonspeech-nemo-v2-GGUF`(Reazon Human Interaction Lab が公開した reazonspeech-nemo-v2 を変換したもの) | Apache-2.0 |
 | 音声認識(英語、フランス語、ドイツ語、イタリア語、ポルトガル語、スペイン語、選んだときだけ) | parakeet-tdt-0.6b-v3(GGUF、F16) | `sakasegawa/parakeet-tdt-0.6b-v3-GGUF`(NVIDIA が公開したモデルを変換したもの) | CC BY 4.0 |
 | 音声認識(ブラウザの中、予備) | Whisper small(ONNX、transformers.js) | `onnx-community/whisper-small` | MIT(OpenAI Whisper) |
 | 声の区間の検出 | Silero VAD(ONNX、同梱) | 同梱 | MIT |
@@ -25,9 +26,9 @@ sidebar:
 | 相槌の種類の判定(日本語) | sbintuitions/modernbert-ja-70m を合成データで fine-tune したもの(ONNX int8) | [sakasegawa/modernbert-ja-70m-aizuchi](https://huggingface.co/sakasegawa/modernbert-ja-70m-aizuchi) | MIT |
 | 記憶の意味検索 | multilingual-e5 small(ONNX int8) | `Xenova/multilingual-e5-small`(`intfloat/multilingual-e5-small` を変換したもの) | MIT |
 
-音声認識の Qwen3-ASR と FastConformer の 3 つのモデル(parakeet-tdt_ctc-0.6b-ja、ReazonSpeech NeMo v2、parakeet-tdt-0.6b-v3)と、読み上げの Irodori-TTS と Qwen3-TTS は、アプリに同梱した speech.cpp で動かします。Mac では Metal で、Windows では Vulkan で GPU を使います。取得する大きさは、音声認識の Qwen3-ASR 1.7B が約 2.2GB、0.6B が約 0.8GB、parakeet-tdt_ctc-0.6b-ja と ReazonSpeech NeMo v2 がそれぞれ約 1.2GB、parakeet-tdt-0.6b-v3 が約 1.3GB、Irodori-TTS が約 1.9GB、Qwen3-TTS の 0.6B が約 1.2GB、1.7B が約 2.3GB です。同梱しているプログラムは[同梱しているもの](/docs/reference/bundled/)にあります。
+音声認識の Qwen3-ASR と FastConformer の 4 つのモデル(parakeet-tdt_ctc-0.6b-ja、ReazonSpeech NeMo v2、parakeet-tdt-0.6b-v3、Haas-ja-v1.0)と、読み上げの Irodori-TTS と Qwen3-TTS は、アプリに同梱した speech.cpp で動かします。Mac では Metal で、Windows では Vulkan で GPU を使います。取得する大きさは、音声認識の Qwen3-ASR 1.7B が約 2.2GB、0.6B が約 0.8GB、parakeet-tdt_ctc-0.6b-ja と ReazonSpeech NeMo v2 と Haas-ja-v1.0 がそれぞれ約 0.66GB、parakeet-tdt-0.6b-v3 が約 1.3GB、Irodori-TTS が約 1.9GB、Qwen3-TTS の 0.6B が約 1.2GB、1.7B が約 2.3GB です。同梱しているプログラムは[同梱しているもの](/docs/reference/bundled/)にあります。
 
-音声認識の Qwen3-ASR は、ASIST の会話の 11 の言語をすべて聞き取ります。FastConformer の 3 つのモデルは、聞き取れる言語が限られます。parakeet-tdt_ctc-0.6b-ja と ReazonSpeech NeMo v2 は日本語だけを聞き取ります。parakeet-tdt-0.6b-v3 はヨーロッパの 25 の言語を聞き取り、会話の言語のうちでは英語、フランス語、ドイツ語、イタリア語、ポルトガル語、スペイン語です。韓国語、ヒンディー語、インドネシア語を聞き取れるのは Qwen3-ASR だけです。モデルを自動で選ぶときは Qwen3-ASR を使い、FastConformer のモデルは設定の「声」で選んだときだけ使います。日本語を読み上げた文(Common Voice 8.0 の 4,483 本)では、parakeet-tdt_ctc-0.6b-ja が Qwen3-ASR 1.7B より誤りが少なく、速く書き起こしました。ふだんの会話の話し言葉では、まだ比べていません。
+音声認識の Qwen3-ASR は、ASIST の会話の 11 の言語をすべて聞き取ります。FastConformer の 4 つのモデルは、聞き取れる言語が限られます。Haas-ja-v1.0 と parakeet-tdt_ctc-0.6b-ja と ReazonSpeech NeMo v2 は日本語だけを聞き取ります。parakeet-tdt-0.6b-v3 はヨーロッパの 25 の言語を聞き取り、会話の言語のうちでは英語、フランス語、ドイツ語、イタリア語、ポルトガル語、スペイン語です。韓国語、ヒンディー語、インドネシア語を聞き取れるのは Qwen3-ASR だけです。モデルを自動で選ぶときは Qwen3-ASR を使い、FastConformer のモデルは設定の「声」で選んだときだけ使います。日本語を読み上げた文(Common Voice 8.0 の 4,483 本)では、parakeet-tdt_ctc-0.6b-ja が Qwen3-ASR 1.7B より誤りが少なく、速く書き起こしました。ふだんの会話の話し言葉では、まだ比べていません。
 
 音声認識と MaAI と相槌の種類の判定は、会話のマイクを入れているあいだだけ読み込み、マイクを切ると止めます。Irodori-TTS と Qwen3-TTS は、マイクを入れたときと、何かを読み上げるときに読み込みます。マイクを切ったあとは、5 分のあいだ何も読み上げなければ止めます。ウィンドウを閉じているときと最小化しているときは、言いかけの返事が終われば止めます。止めると、Mac ではメモリが、Windows では GPU のメモリが空きます。読み込み直すのは、ファイルが OS のキャッシュに残っていれば長くても 3 秒ほどで、ふつうはマイクを入れてから最初の返事を読み上げるまでに終わります。声のエンジンが Gemini Live のときは、どれも読み込みません。
 

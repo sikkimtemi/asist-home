@@ -11,7 +11,7 @@ sidebar:
 |---|---|---|
 | uv | Astral の GitHub のリリース。ハッシュで確かめてから同梱します。 | MIT か Apache-2.0 |
 | git | Mac では kernel.org のソースの tarball。ハッシュで確かめてから、手元の操作に要る部分だけをコンパイルします。ソースには手を加えていません。Windows では Git for Windows が配る MinGit。ハッシュで確かめてから、ASIST が使わない部分を除いて同梱します。 | GPL-2.0 |
-| speech.cpp の speech | [nyosegawa/speech.cpp](https://github.com/nyosegawa/speech.cpp) の GitHub のリリース。ハッシュで確かめてから、実行ファイルの `speech` だけを同梱します。音声認識の Qwen3-ASR と FastConformer の 3 つのモデルと、読み上げの Irodori-TTS と Qwen3-TTS を動かします。 | MIT |
+| speech.cpp の speech | [nyosegawa/speech.cpp](https://github.com/nyosegawa/speech.cpp) の GitHub のリリース。ハッシュで確かめてから、実行ファイルの `speech` だけを同梱します。音声認識の Qwen3-ASR と Haas を含む FastConformer の 4 つのモデルと、読み上げの Irodori-TTS と Qwen3-TTS を動かします。 | MIT |
 
 どれもライセンスの本文をアプリの中に入れています。git のソースは、各バージョンの [Release](https://github.com/nyosegawa/asist/releases) に同じバージョンの tarball を置いています。Windows の git については、同じバージョンの Git for Windows のソースを置いています。
 

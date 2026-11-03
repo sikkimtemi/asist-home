@@ -156,28 +156,28 @@ export function VoicePage({ ctx }: { ctx: SettingsContext }): React.JSX.Element 
   const sampleLanguage = languageOf(settings.conversationLocale)
   const features = conversationFeatures(settings.conversationLocale)
   const capabilities = platformCapabilities()
-  const localSpeech = capabilities.localSpeech
+  const { localAsr, localTts } = capabilities
   // The engines this machine runs that can read the conversation language. A saved engine that is not
   // among them, which a change of language or settings brought from another machine leaves behind,
   // shows as no selection until one is picked.
   const engines = (['irodori', 'qwen3tts', 'voicevox', 'aivisspeech', 'system', 'none'] as const).filter(
-    (option) => ttsEngineSpeaks(settings.conversationLocale, option) && ttsEngineRuns(option, localSpeech)
+    (option) => ttsEngineSpeaks(settings.conversationLocale, option) && ttsEngineRuns(option, localTts)
   )
   const engineUsable = (engines as readonly TtsEngine[]).includes(engine)
   const speakers = useSpeakerOptions(engineUsable, engine)
   // The size is chosen where the memory holds more than one. A saved size this machine does not offer,
   // which settings brought from a larger machine leave behind, stays in the list because it is the one
   // that runs, until a smaller one is picked.
-  const offeredSizes = offeredQwenTtsSizes(localSpeech)
+  const offeredSizes = offeredQwenTtsSizes(localTts)
   const qwenTtsSizes = QWEN_TTS_SIZES.filter((size) => offeredSizes.includes(size) || size === settings.qwenTtsSize)
   const asrReady = status !== null && speechEnginePrepared(status.asr)
-  const asrChoices = localSpeech.backend === null ? [] : asrModelChoices(settings.conversationLocale, speechCatalog())
+  const asrChoices = localAsr.backend === null ? [] : asrModelChoices(settings.conversationLocale, speechCatalog())
   const asrModel = statusOf(setup)?.asr ?? null
   const vapRead = statusOf(vap)
   const classifier = statusOf(aizuchiClassifier)
   const vapReady = vapRead?.runtimeInstalled === true && vapRead.modelsInstalled
   const classifierReady = classifier?.runtimeInstalled === true && classifier.modelInstalled
-  const readiness = engineUsable ? speechReadiness(engine, status, localSpeech) : null
+  const readiness = engineUsable ? speechReadiness(engine, status, localTts) : null
   const ttsMissing = readiness === 'missing'
   const preview = (
     <Btn
@@ -209,15 +209,15 @@ export function VoicePage({ ctx }: { ctx: SettingsContext }): React.JSX.Element 
   return (
     <Page title={t('settingsVoice.title')} lead={t('settingsVoice.lead')}>
       <Group title={t('settingsVoice.recognition.title')} description={t('settingsVoice.recognition.description')}>
-        {localSpeech.backend === null ? (
-          <Row label={t('settingsVoice.recognition.model')} hint={t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localSpeech.reason])} />
+        {localAsr.backend === null ? (
+          <Row label={t('settingsVoice.recognition.model')} hint={t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localAsr.reason])} />
         ) : (
           <>
             <Row
               label={t('settingsVoice.recognition.model')}
               hint={
                 asrModel
-                  ? t('settingsVoice.recognition.modelHint', { memoryGb: asrModel.totalMemoryGb, model: asrModel.label, reason: asrChoiceReason(t, localSpeech.backend, asrModel) })
+                  ? t('settingsVoice.recognition.modelHint', { memoryGb: asrModel.totalMemoryGb, model: asrModel.label, reason: asrChoiceReason(t, localAsr, asrModel) })
                   : (readFailure(setup) ?? t('settingsVoice.recognition.checking'))
               }
             >
@@ -234,7 +234,7 @@ export function VoicePage({ ctx }: { ctx: SettingsContext }): React.JSX.Element 
                     .catch((err: unknown) => toast({ kind: 'error', title: t('settingsVoice.recognition.changeFailed'), body: displayError(err) }))
                 }}
               >
-                <option value="auto">{t(`settingsVoice.recognition.automatic.${localSpeech.backend}`)}</option>
+                <option value="auto">{t(`settingsVoice.recognition.automatic.${localAsr.backend}`)}</option>
                 {asrChoices.map((model) => (
                   <option key={model.id} value={model.id}>
                     {asrChoiceLabel(t, formatLocale, model)}
@@ -262,7 +262,7 @@ export function VoicePage({ ctx }: { ctx: SettingsContext }): React.JSX.Element 
       </Group>
 
       <Group title={t('settingsVoice.speech.title')} description={t(osMessageKey('settingsVoice.speech.description', capabilities.os))}>
-        <Row label={t('settingsVoice.speech.engine')} hint={!ttsEngineRuns(engine, localSpeech) ? t('voice.speech.cannotRunHere', { engine: ttsEngineLabel(t, engine) }) : undefined}>
+        <Row label={t('settingsVoice.speech.engine')} hint={!ttsEngineRuns(engine, localTts) ? t('voice.speech.cannotRunHere', { engine: ttsEngineLabel(t, engine) }) : undefined}>
           {readiness === 'starting' && <Chip>{t('settingsModels.starting')}</Chip>}
           {ttsMissing && <Chip tone="warn">{isLocalTtsEngine(engine) ? t('common.notReady') : t('common.notFound')}</Chip>}
           <select
@@ -280,7 +280,7 @@ export function VoicePage({ ctx }: { ctx: SettingsContext }): React.JSX.Element 
         </Row>
         {ttsMissing && isLocalTtsEngine(engine) && (
           <PrepLine
-            text={t(!recommendLocalTts(localSpeech) ? osMessageKey('settingsModels.speech.localModelTooLittleMemory', capabilities.os) : 'settingsModels.speech.localModel', {
+            text={t(!recommendLocalTts(localTts) ? osMessageKey('settingsModels.speech.localModelTooLittleMemory', capabilities.os) : 'settingsModels.speech.localModel', {
               model: localTtsModel(engine, settings.qwenTtsSize, speechCatalog()).label,
               sizeGb: new Intl.NumberFormat(formatLocale, { maximumFractionDigits: 1 }).format(localTtsSizeGb(localTtsModel(engine, settings.qwenTtsSize, speechCatalog())))
             })}

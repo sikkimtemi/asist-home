@@ -170,7 +170,7 @@ export function SpeakingStep({
 
 export function ListeningStep({
   locale,
-  localSpeech,
+  localAsr,
   choice,
   onChoice,
   setup,
@@ -189,7 +189,7 @@ export function ListeningStep({
   /** The conversation language, whose speech recognition models are the ones to choose from. */
   locale: ConversationLocale
   /** Where this machine cannot run the model, its reason stands in place of that choice. */
-  localSpeech: PlatformCapabilities['localSpeech']
+  localAsr: PlatformCapabilities['localAsr']
   choice: ListeningChoice | null
   onChoice: (choice: ListeningChoice) => void
   setup: SetupStatus | null
@@ -221,13 +221,13 @@ export function ListeningStep({
       : { tone: 'warn' as const, label: t('common.notReady') }
   return (
     <div className="su-stack">
-      {localSpeech.backend === null ? (
-        <p className="su-hint">{t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localSpeech.reason])}</p>
+      {localAsr.backend === null ? (
+        <p className="su-hint">{t(LOCAL_SPEECH_UNAVAILABLE_TEXT[localAsr.reason])}</p>
       ) : (
         <Option
           active={choice === 'server'}
           title={asr && !usesRecommendedAsr(asr) ? asr.label : t('setup.listening.recommended', { model: asr?.label ?? t('setup.listening.unknownModel') })}
-          detail={asr ? asrChoiceReason(t, localSpeech.backend, asr) : t(`setup.listening.unknownReason.${localSpeech.backend}`)}
+          detail={asr ? asrChoiceReason(t, localAsr, asr) : t(`setup.listening.unknownReason.${localAsr.backend}`)}
           chip={serverChip}
           onClick={() => onChoice('server')}
         >
@@ -257,7 +257,7 @@ export function ListeningStep({
           <Advanced title={t('setup.listening.details.title')} note={t('setup.listening.details.note')}>
             <div className="su-details">
               <select className="st-select" value={asrModel} disabled={downloadBusy} onChange={(event) => onAsrModel(event.target.value as AsrModel)}>
-                <option value="auto">{t(`setup.listening.automaticModel.${localSpeech.backend}`)}</option>
+                <option value="auto">{t(`setup.listening.automaticModel.${localAsr.backend}`)}</option>
                 {asrModelChoices(locale, speechCatalog()).map((model) => (
                   <option key={model.id} value={model.id}>
                     {asrChoiceLabel(t, formatLocale, model)}
@@ -266,7 +266,7 @@ export function ListeningStep({
               </select>
               <dl>
                 <div>
-                  <dt>{t(`setup.listening.details.memory.${localSpeech.backend}`)}</dt>
+                  <dt>{t(`setup.listening.details.memory.${localAsr.backend}`)}</dt>
                   <dd>{asr?.totalMemoryGb ?? '—'} GB</dd>
                 </div>
                 <div>

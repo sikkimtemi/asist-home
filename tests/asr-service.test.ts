@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { errorText } from '@shared/i18n/error-text'
 import { ASR_MODEL_SPECS, asrDownloadGb } from '@shared/asr-models'
 import { deriveCapabilities } from '@shared/platform'
-import { MACOS, WINDOWS, WINDOWS_WITHOUT_GPU, setCapabilities } from './helpers/platform'
+import { MACOS, WINDOWS, WINDOWS_WITHOUT_GPU, WINDOWS_INTEGRATED, setCapabilities } from './helpers/platform'
 import { TEST_SPEECH_CATALOG } from './helpers/speech-catalog'
 
 const mocks = vi.hoisted(() => ({
@@ -162,6 +162,25 @@ describe('Windows with a discrete GPU', () => {
   })
 })
 
+describe('Windows with integrated graphics', () => {
+  beforeEach(() => setCapabilities(WINDOWS_INTEGRATED))
+  afterEach(() => setCapabilities(MACOS))
+
+  it('prepares, starts and transcribes with the explicitly selected Haas model', async () => {
+    mocks.settings.asrModel = 'haas-ja-v1.0'
+    const asr = await import('../src/main/services/asr')
+    const spec = ASR_MODEL_SPECS['haas-ja-v1.0']
+    expect(await asr.installationStatus()).toMatchObject({ resolvedModel: 'haas-ja-v1.0', recommendedModel: 'qwen3-asr-0.6b', label: spec.label })
+    await asr.prepareModel('haas-ja-v1.0', vi.fn())
+    await asr.ensureWorker()
+    const samples = new Float32Array(1600)
+    await asr.transcribe(samples, 'haas')
+    expect(mocks.localPrepare.mock.calls[0][0]).toBe(spec)
+    expect(mocks.localEnsure).toHaveBeenCalledWith(spec)
+    expect(mocks.localTranscribe).toHaveBeenCalledWith(spec, samples, 'haas')
+  })
+})
+
 describe('a machine without a GPU for the local speech recognition', () => {
   beforeEach(() => setCapabilities(WINDOWS_WITHOUT_GPU))
   afterEach(() => setCapabilities(MACOS))
@@ -176,7 +195,7 @@ describe('a machine without a GPU for the local speech recognition', () => {
 
   it('refuses a transcription and a preparation with the reason', async () => {
     const asr = await import('../src/main/services/asr')
-    await expect(asr.transcribe(new Float32Array([0.1]))).rejects.toThrow(errorText('speechRecognition.unavailable.noDiscreteGpu'))
+    await expect(asr.transcribe(new Float32Array([0.1]))).rejects.toThrow(errorText('speechRecognition.unavailable.noGpu'))
     expect((await asr.prepareModel('auto', vi.fn())).ok).toBe(false)
     expect(mocks.localTranscribe).not.toHaveBeenCalled()
     expect(mocks.localPrepare).not.toHaveBeenCalled()

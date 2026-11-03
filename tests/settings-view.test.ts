@@ -26,7 +26,7 @@ import { VOICE_SAMPLE_TEXT } from '@shared/voice-samples'
 import { speechPlayer } from '../src/renderer/src/voice/SpeechPlayer'
 import type { PlatformCapabilities } from '@shared/platform'
 import type { AppUpdateState } from '@shared/app-update'
-import { MACOS, WINDOWS, WINDOWS_WITHOUT_GPU, setCapabilities } from './helpers/platform'
+import { MACOS, WINDOWS, WINDOWS_WITHOUT_GPU, WINDOWS_INTEGRATED, setCapabilities } from './helpers/platform'
 import { TEST_SPEECH_CATALOG } from './helpers/speech-catalog'
 
 // The voice modules build an AudioContext at import time, so they are replaced for a test that only renders the UI.
@@ -1175,6 +1175,25 @@ describe('settings dialog with the conversation held in another language', () =>
 })
 
 describe('the speech recognition models of the voice page', () => {
+  it('selects Haas on integrated graphics while leaving unavailable synthesis out of the choices', async () => {
+    setCapabilities(WINDOWS_INTEGRATED)
+    try {
+      const view = await render()
+      await act(async () => nav(view, 'voice').click())
+      const models = view.querySelector<HTMLSelectElement>(`[aria-label="${t('settingsVoice.recognition.modelLabel')}"]`)!
+      await act(async () => {
+        models.value = 'haas-ja-v1.0'
+        models.dispatchEvent(new Event('change', { bubbles: true }))
+      })
+      expect(api.saveSettings).toHaveBeenCalledWith({ asrModel: 'haas-ja-v1.0' })
+      const engines = view.querySelector<HTMLSelectElement>(`[aria-label="${t('settingsVoice.speech.engineLabel')}"]`)!
+      expect([...engines.options].map((option) => option.value)).toEqual(['voicevox', 'aivisspeech', 'system', 'none'])
+      await act(async () => nav(view, 'overview').click())
+      expect(pendingLabels(view)).toContain(t('settingsModels.asr.title'))
+    } finally {
+      setCapabilities(MACOS)
+    }
+  })
   const values = (view: HTMLElement): string[] =>
     [...view.querySelector<HTMLSelectElement>(`[aria-label="${t('settingsVoice.recognition.modelLabel')}"]`)!.options].map((option) => option.value)
 
@@ -1229,7 +1248,8 @@ describe('settings dialog on Windows with a discrete GPU', () => {
       option('qwen3-asr-1.7b'),
       option('qwen3-asr-0.6b'),
       option('parakeet-tdt_ctc-0.6b-ja'),
-      option('reazonspeech-nemo-v2')
+      option('reazonspeech-nemo-v2'),
+      option('haas-ja-v1.0')
     ])
     expect(hint(view, t('settingsVoice.recognition.model'))).toBe(
       t('settingsVoice.recognition.modelHint', { memoryGb: 8, model: label, reason: t('speechRecognition.recommendation.vulkan.larger', { memoryGb: 8 }) })
@@ -1436,7 +1456,7 @@ describe('settings dialog on a machine without the local models, the native micr
     const engines = [...view.querySelector<HTMLSelectElement>(`[aria-label="${t('settingsVoice.speech.engineLabel')}"]`)!.options].map((option) => option.value)
     expect(engines).not.toContain('qwen3tts')
     expect(engines).not.toContain('irodori')
-    expect(hint(view, t('settingsVoice.recognition.model'))).toBe(t('speechRecognition.unavailable.noDiscreteGpu'))
+    expect(hint(view, t('settingsVoice.recognition.model'))).toBe(t('speechRecognition.unavailable.noGpu'))
     expect(view.querySelector(`[aria-label="${t('settingsVoice.recognition.modelLabel')}"]`)).toBeNull()
     const labels = rowLabels(view)
     expect(labels).not.toContain(t('settingsVoice.mic.echoCancellation'))
@@ -1447,7 +1467,7 @@ describe('settings dialog on a machine without the local models, the native micr
 
   it('says on the voice page and the overview that the GPU could not be checked when listing the devices failed', async () => {
     const key = 'speechRecognition.unavailable.gpuCheckFailed'
-    setCapabilities({ ...WINDOWS_WITHOUT_GPU, localSpeech: { backend: null, reason: 'gpu-check-failed' } })
+    setCapabilities({ ...WINDOWS_WITHOUT_GPU, localTts: { backend: null, reason: 'gpu-check-failed' }, localAsr: { backend: null, reason: 'gpu-check-failed' } })
     const view = await render()
     expect(view.querySelector('[data-pending="browserWhisper"] .st-row-hint')?.textContent).toBe(t(key))
     await act(async () => nav(view, 'voice').click())

@@ -84,7 +84,8 @@ const MODELS: Array<[ResolvedAsrModel, string]> = [
   ['qwen3-asr-0.6b', 'Qwen3-ASR-0.6B'],
   ['parakeet-tdt_ctc-0.6b-ja', 'parakeet-tdt_ctc-0.6b-ja'],
   ['reazonspeech-nemo-v2', 'reazonspeech-nemo-v2'],
-  ['parakeet-tdt-0.6b-v3', 'parakeet-tdt-0.6b-v3']
+  ['parakeet-tdt-0.6b-v3', 'parakeet-tdt-0.6b-v3'],
+  ['haas-ja-v1.0', 'Haas-ja-v1.0']
 ]
 
 describe.skipIf(!userData || !clips)('the local speech recognition on the real speech worker', () => {

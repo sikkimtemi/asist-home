@@ -16,15 +16,22 @@ export type OsFamily = 'macos' | 'windows'
  */
 export type SpeechBackend = 'metal' | 'vulkan'
 
+/** Whether GPU memory is dedicated to the device or shared with the rest of the computer. */
+export type SpeechMemory = 'shared' | 'dedicated'
+
+/** A local speech task's device and memory, or the reason that task cannot run. */
+export type LocalSpeechCapability = { backend: SpeechBackend; device: string; memoryGb: number; memoryType: SpeechMemory } | { backend: null; reason: LocalSpeechUnavailable }
+
 /**
  * Why this machine cannot run the local speech models, which the screens show in place of the choice.
- * Only Windows can lack them: it has no discrete GPU, or listing the devices failed.
+ * Only Windows can lack them: there is no usable GPU for the task, or listing the devices failed.
  */
-export type LocalSpeechUnavailable = 'no-discrete-gpu' | 'gpu-check-failed'
+export type LocalSpeechUnavailable = 'no-discrete-gpu' | 'no-gpu' | 'gpu-check-failed'
 
 /** The sentence the screens show, and an error carries, for each reason. */
 export const LOCAL_SPEECH_UNAVAILABLE_TEXT = {
   'no-discrete-gpu': 'speechRecognition.unavailable.noDiscreteGpu',
+  'no-gpu': 'speechRecognition.unavailable.noGpu',
   'gpu-check-failed': 'speechRecognition.unavailable.gpuCheckFailed'
 } as const satisfies Record<LocalSpeechUnavailable, MessageKey>
 
@@ -38,12 +45,12 @@ export interface PlatformCapabilities {
    */
   os: OsFamily
   /**
-   * Where the local speech models run: the backend, the device the binaries are told to use, and the
-   * memory the models are loaded into; or why there is none. The memory is the Mac's own on metal, which
-   * the models share with every other app, and the GPU's on vulkan; the recommendations are decided from
-   * that number alone.
+   * Speech synthesis requires Metal or a discrete Vulkan GPU. Recognition also accepts integrated Vulkan
+   * GPUs, whose shared memory must not be treated as dedicated VRAM when recommending a model.
    */
-  localSpeech: { backend: SpeechBackend; device: string; memoryGb: number } | { backend: null; reason: LocalSpeechUnavailable }
+  localTts: LocalSpeechCapability
+  /** Recognition can use integrated Vulkan graphics independently of synthesis. */
+  localAsr: LocalSpeechCapability
   /**
    * The native microphone helper, which captures with the echo of everything the machine plays cancelled:
    * voice processing on macOS, the communications echo canceller on Windows. Without it the renderer
@@ -69,10 +76,10 @@ export interface Machine {
 }
 
 /** The local speech of a Windows machine, from its device list. */
-function windowsSpeech(devices: SpeechDevice[] | null): PlatformCapabilities['localSpeech'] {
+function windowsSpeech(devices: SpeechDevice[] | null, recognition: boolean): LocalSpeechCapability {
   if (devices === null) return { backend: null, reason: 'gpu-check-failed' }
-  const chosen = chooseSpeechDevice(devices)
-  return chosen === null ? { backend: null, reason: 'no-discrete-gpu' } : { backend: 'vulkan', ...chosen }
+  const chosen = chooseSpeechDevice(devices, recognition)
+  return chosen === null ? { backend: null, reason: recognition ? 'no-gpu' : 'no-discrete-gpu' } : { backend: 'vulkan', ...chosen }
 }
 
 /**
@@ -84,15 +91,18 @@ export function deriveCapabilities(machine: Machine): PlatformCapabilities {
   if (platform === 'darwin' && arch === 'arm64') {
     return {
       os: 'macos',
-      localSpeech: { backend: 'metal', device: METAL_DEVICE, memoryGb: Math.max(1, Math.round(totalMemoryBytes / 1024 ** 3)) },
+      localTts: { backend: 'metal', device: METAL_DEVICE, memoryGb: Math.max(1, Math.round(totalMemoryBytes / 1024 ** 3)), memoryType: 'shared' },
+      localAsr: { backend: 'metal', device: METAL_DEVICE, memoryGb: Math.max(1, Math.round(totalMemoryBytes / 1024 ** 3)), memoryType: 'shared' },
       nativeMic: true,
       hotkey: 'Alt+Space'
     }
   }
   if (platform === 'win32' && arch === 'x64') {
+    const devices = speechDevices()
     return {
       os: 'windows',
-      localSpeech: windowsSpeech(speechDevices()),
+      localTts: windowsSpeech(devices, false),
+      localAsr: windowsSpeech(devices, true),
       nativeMic: micCancelsEcho(),
       // On a Windows 11 machine with PowerToys, Copilot and Claude running (2026-09-27), Alt+Space and
       // Ctrl+Alt+Space were already taken, as were Ctrl+Win+Space and Win+Shift+Space, which switch the

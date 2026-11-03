@@ -143,15 +143,15 @@ async function startWorker(engine: LocalTtsEngine): Promise<boolean> {
   const spec = workerSpec(engine)
   if (starting && workerKey === spec.key) return starting
   stopWorker()
-  const { localSpeech } = platformCapabilities()
+  const { localTts } = platformCapabilities()
   // The capabilities leave the local engines out where the local speech does not run, so a start here is a caller's mistake.
-  if (localSpeech.backend === null) throw new Error(`${spec.model.label} cannot run on this machine`)
+  if (localTts.backend === null) throw new Error(`${spec.model.label} cannot run on this machine`)
   if (!filesInstalled(spec.model.files)) return false
   // speech ships with the app, so a missing one is a broken build rather than something to prepare.
   if (!fs.existsSync(speechPath())) throw new Error(`speech is missing from ${speechPath()}`)
   const started: SpeechWorker = startSpeechWorker(speechPath(), spec.file, spec.args, spec.logName, {
     task: 'synthesis',
-    device: localSpeech.device,
+    device: localTts.device,
     silence: { ms: SILENT_WORKER_TIMEOUT_MS, error: () => new Error(errorText('voice.speech.engineNoResponse', { engine: spec.model.label })) },
     onFailure: (error) => {
       if (worker === started) stopWorker(workerFailure(error))
@@ -292,6 +292,7 @@ export function prepare(engine: LocalTtsEngine, onProgress: (progress: SetupProg
   const controller = new AbortController()
   const { key, model } = workerSpec(engine)
   const operation = prepareModelFiles({
+    task: 'tts',
     files: model.files,
     label: model.label,
     feature: model.label,

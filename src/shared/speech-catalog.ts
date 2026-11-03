@@ -13,7 +13,8 @@ export const SPEECH_MODEL_NAMES = [
   'qwen3-asr-0.6b',
   'parakeet-tdt_ctc-0.6b-ja',
   'reazonspeech-v2',
-  'parakeet-tdt-0.6b-v3'
+  'parakeet-tdt-0.6b-v3',
+  'haas-ja-v1.0'
 ] as const
 
 export type SpeechModelName = (typeof SPEECH_MODEL_NAMES)[number]

@@ -1,13 +1,13 @@
 # ローカルの音声認識と読み上げは、同梱した speech.cpp で GPU の上で動かす
 
-macOS でも Windows でも、ローカルの音声認識の Qwen3-ASR(1.7B と 0.6B)と、読み上げの Qwen3-TTS(0.6B と 1.7B)と Irodori-TTS は、自分で実装した speech.cpp のワーカーで GGUF のモデルを動かす。speech.cpp はアプリに同梱し、Mac では Metal で、Windows では Vulkan で GPU を使う。モデルは Hugging Face から、版と sha256 を固定して取得する。Python の実行環境を作らないので、初回の準備はモデルの取得だけで済み、OS ごとに別の推論の実装を保たなくてよい。どの OS でも同じモデルの同じファイルを使うので、聞き取りと声の質が OS で変わらない。Windows では単体の GPU があるマシンでだけ提供し、それ以外のマシンでは理由を出して、ブラウザの中の Whisper と live のエンジンを使ってもらう。
+macOS でも Windows でも、ローカルの音声認識の Qwen3-ASR と FastConformer のモデルと、読み上げの Qwen3-TTS(0.6B と 1.7B)と Irodori-TTS は、自分で実装した speech.cpp のワーカーで GGUF のモデルを動かす。speech.cpp はアプリに同梱し、Mac では Metal で、Windows では Vulkan で GPU を使う。モデルは Hugging Face から、版と sha256 を固定して取得する。Python の実行環境を作らないので、初回の準備はモデルの取得だけで済み、OS ごとに別の推論の実装を保たなくてよい。どの OS でも同じモデルの同じファイルを使うので、聞き取りと声の質が OS で変わらない。Windows の音声認識は、単体の GPU と統合 GPU の両方で提供する。利用者の HM90(Ryzen 9 4900H)では、speech.cpp 0.10.1 の Haas Q8_0 をマイク入力で試し、ブラウザの Whisper より良く、CPU より Vulkan が快適だったとの確認がある。読み上げまで同じ条件で有効にすると、未検証の重いモデルも共有メモリで動くため、読み上げは単体の GPU があるマシンだけで提供する。統合 GPU の共有メモリを専用の VRAM と同じ扱いにしない。自動の音声認識は小さい Qwen3-ASR 0.6B とし、日本語の Haas は明示的に選ぶ。
 
 ## 見送った案
 
 - **Mac では MLX、Windows では CUDA の torch で動かす。** OS ごとに別の実装と、数 GB の Python の実行環境を保つことになる。Windows では NVIDIA の GPU、ドライバー 580 以上、RTX 20 以降に限られ、Qwen3-TTS は Windows で動かなかった。
 - **Qwen3-TTS を qwentts.cpp で動かす。** 文を分けて作った声を聞き比べると、震えるような雑音が乗っていた。Qwen3-TTS の codec は過去の入力だけを見るので、speech.cpp は途中の状態を持ち越して、分けて作っても一度に作った声と同じ波形を出す。
 - **llama.cpp の CUDA の版を同梱する。** CUDA 13 の版は RTX 20 の機械語を含まず、ドライバーが対応する CUDA より新しいとき起動に失敗する。CUDA 12 の版は動いたが、最初の起動で GPU のコードのコンパイルに 28 秒かかった。Vulkan はドライバーの版を問わず、下の実測のとおり速さも足りる。
-- **Windows の統合 GPU でも動かす。** 測っていない。メモリを CPU と分け合うので、音声認識と読み上げを同時に動かして間に合うかを確かめてから決める。
+- **Windows の統合 GPU で音声認識と読み上げを一緒に有効にする。** Haas の音声認識は利用者が確認したが、ローカルの読み上げとの同時実行は未検証なので、利用条件を分ける。
 - **メモリの少ない Mac のために Whisper large-v3-turbo を残す。** Qwen3-ASR 0.6B が 2 GB 足らずで動くので、選択肢を Qwen3-ASR だけにまとめた。
 - **音声認識を llama.cpp の llama-server で動かす。** はじめはこうしていたが、ADR 0059 で speech.cpp に置き換えた。読み上げとは別の実行環境を持つことになり、約 270 秒より長い発話は失敗し、公式の実装と違う文を書く発話があった。
 - **Windows で、sherpa-onnx の日本語のモデル(ReazonSpeech の zipformer)を CPU で動かす。** GPU が要らないが、Mac と違うモデルになり、聞き取りの質を別に調整することになる。
@@ -31,7 +31,7 @@ macOS でも Windows でも、ローカルの音声認識の Qwen3-ASR(1.7B と 
 
 ## 分かっている制約
 
-- 単体の GPU が無い Windows のマシンでは、ローカルの音声認識と読み上げ(Qwen3-TTS と Irodori-TTS)を使えない。
+- 単体の GPU が無い Windows のマシンでは、ローカルの読み上げ(Qwen3-TTS と Irodori-TTS)を使えない。ローカルの音声認識は、Vulkan が使える統合 GPU でも利用できる。
 - 新しい版のアプリや GPU のドライバーを入れたあとの最初の起動では、Mac では Metal のカーネルを、Windows では Vulkan のシェーダーを組み立てるので、その回だけ準備が長くなる。
 - 同梱した相槌の音声は Qwen3-TTS 0.6B で作ったもので、1.7B で読み上げるときも同じものを鳴らす。
 - speech.cpp は ASIST のために作ったもので、Qwen3-ASR、Qwen3-TTS、Irodori-TTS の新しい版には自分で追従する。

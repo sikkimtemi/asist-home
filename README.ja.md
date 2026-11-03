@@ -53,7 +53,7 @@ ASIST は、話しかけると声で答えるアシスタントです。天気�
 
 ## はじめる
 
-必要なのは、Apple Silicon の Mac(macOS 14 以降)か x64 の Windows 11 の PC と、会話のモデルの API キー(Anthropic、OpenAI、Google、Cerebras のどれか 1 つ)です。Windows で声の聞き取りと Qwen3-TTS をこのコンピュータの中で動かすには、Vulkan が動く単体の GPU が要ります。GPU が無くても、ブラウザの中で動く Whisper か Live API の声のエンジンで話すか、文字で使えます。カレンダーには、Google アカウントが要ります。Agent のジョブには codex か claude の CLI が要り、どちらも ChatGPT や Claude のプランでのサインインでも、API キーでも使えます。
+必要なのは、Apple Silicon の Mac(macOS 14 以降)か x64 の Windows 11 の PC と、会話のモデルの API キー(Anthropic、OpenAI、Google、Cerebras のどれか 1 つ)です。Windows の声の聞き取りには Vulkan が動く単体 GPU または内蔵 GPU を使い、読み上げの Irodori-TTS と Qwen3-TTS には単体 GPU が要ります。使える GPU が無くても、ブラウザの中で動く Whisper か Live API の声のエンジンで話すか、文字で使えます。日本語の Haas など、選べるモデルは[声のエンジン](https://asist-agent.com/docs/settings/voice-engine/)にあります。カレンダーには、Google アカウントが要ります。Agent のジョブには codex か claude の CLI が要り、どちらも ChatGPT や Claude のプランでのサインインでも、API キーでも使えます。
 
 1. [Releases](https://github.com/nyosegawa/asist/releases/latest) からダウンロードします。Mac では `ASIST-arm64.dmg` をダウンロードし、ASIST を「アプリケーション」に入れます。Windows では `ASIST-Setup-x64.exe` をダウンロードして開きます。インストーラーにはまだ署名が無いので、SmartScreen の警告が出たら「詳細情報」を押し、そのあと「実行」を押します。
 2. ASIST を開き、初回セットアップで言語、モデル、声、マイクを選びます。

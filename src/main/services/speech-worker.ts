@@ -5,9 +5,12 @@ import { errorText } from '@shared/i18n/error-text'
 import { watchForAsistEnd } from './asist-end-watcher'
 import { childEnv } from './child-env'
 import { platformCapabilities } from './platform'
+import { SPEECH_CPP_SERIES, WORKER_PROTOCOL } from '@shared/speech-worker-protocol'
+
+export { SPEECH_CPP_SERIES, WORKER_PROTOCOL } from '@shared/speech-worker-protocol'
 
 /**
- * The processes the local speech runs in, and the client of speech.cpp's worker protocol 3: one JSON object per
+ * The processes the local speech runs in, and the client of speech.cpp's worker protocol 4: one JSON object per
  * line on stdin and on stdout, and nothing else on stdout; the first message is `ready`, with the model's
  * information, or `fatal`; then each request gets the answers that name it by its id and exactly one terminal
  * message, `end`, `error` or `cancelled`, and nothing after it; stderr goes to the app log under the worker's name.
@@ -15,16 +18,6 @@ import { platformCapabilities } from './platform'
  * stops every one of them. A worker reads its requests from stdin and ends by itself once ASIST is gone and the pipe
  * closes, however ASIST ended; a process that reads nothing from ASIST is started through spawnUnattended.
  */
-
-/** The version of speech.cpp's worker protocol this client speaks, which a worker raises when its callers must change. */
-export const WORKER_PROTOCOL = 3
-
-/**
- * The series of speech.cpp releases this client is written for, its major and minor version. While speech.cpp is
- * 0.x, a release that a caller must adapt to raises the minor version, so a worker of another series is refused
- * rather than misread.
- */
-export const SPEECH_CPP_SERIES = '0.8'
 
 /** The series of a release version such as `0.7.0`, or null for anything else. */
 const seriesOf = (version: unknown): string | null =>

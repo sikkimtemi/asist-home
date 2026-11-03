@@ -128,9 +128,9 @@ export function qwenTtsLanguage(locale: string): string | null {
 
 /** Whether this machine can run a local engine at all: wherever the local speech runs. */
 export function localTtsRuns(
-  localSpeech: PlatformCapabilities['localSpeech']
-): localSpeech is Extract<PlatformCapabilities['localSpeech'], { memoryGb: number }> {
-  return localSpeech.backend !== null
+  localTts: PlatformCapabilities['localTts']
+): localTts is Extract<PlatformCapabilities['localTts'], { memoryGb: number }> {
+  return localTts.backend !== null
 }
 
 /**
@@ -138,16 +138,16 @@ export function localTtsRuns(
  * settings brought over from a Mac, is treated like one that cannot speak the conversation language:
  * it is not offered, not counted as something to prepare, and reading with it fails with the reason.
  */
-export const ttsEngineRuns = (engine: TtsEngine, localSpeech: PlatformCapabilities['localSpeech']): boolean =>
-  !isLocalTtsEngine(engine) || localTtsRuns(localSpeech)
+export const ttsEngineRuns = (engine: TtsEngine, localTts: PlatformCapabilities['localTts']): boolean =>
+  !isLocalTtsEngine(engine) || localTtsRuns(localTts)
 
 /** Whether to offer the local engines: a machine that runs them, with the memory for one beside the speech recognition. */
-export function recommendLocalTts(localSpeech: PlatformCapabilities['localSpeech']): boolean {
-  return localTtsRuns(localSpeech) && localSpeech.memoryGb >= RECOMMENDED_FROM_GB[localSpeech.backend]
+export function recommendLocalTts(localTts: PlatformCapabilities['localTts']): boolean {
+  return localTtsRuns(localTts) && localTts.memoryGb >= RECOMMENDED_FROM_GB[localTts.backend]
 }
 
 /** The sizes to choose from on this machine: 0.6B wherever Qwen3-TTS runs, 1.7B where the memory holds it. */
-export function offeredQwenTtsSizes(localSpeech: PlatformCapabilities['localSpeech']): QwenTtsSize[] {
-  if (!localTtsRuns(localSpeech)) return []
-  return localSpeech.memoryGb >= LARGER_FROM_GB[localSpeech.backend] ? ['0.6b', '1.7b'] : ['0.6b']
+export function offeredQwenTtsSizes(localTts: PlatformCapabilities['localTts']): QwenTtsSize[] {
+  if (!localTtsRuns(localTts)) return []
+  return localTts.memoryGb >= LARGER_FROM_GB[localTts.backend] ? ['0.6b', '1.7b'] : ['0.6b']
 }

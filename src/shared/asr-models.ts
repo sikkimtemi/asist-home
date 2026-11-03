@@ -1,13 +1,13 @@
 import type { ConversationLocale } from './conversation-locale'
 import type { PinnedFile } from './pinned-file'
-import type { SpeechBackend } from './platform'
+import type { SpeechBackend, SpeechMemory } from './platform'
 import type { SpeechCatalog, SpeechModelName } from './speech-catalog'
 
 /**
  * The speech recognition models the setting can name. Each runs in speech.cpp's worker from the same GGUF file on
  * every machine, so a setting written on one machine means the same model on another.
  */
-export const ASR_MODELS = ['auto', 'qwen3-asr-1.7b', 'qwen3-asr-0.6b', 'parakeet-tdt_ctc-0.6b-ja', 'reazonspeech-nemo-v2', 'parakeet-tdt-0.6b-v3'] as const
+export const ASR_MODELS = ['auto', 'qwen3-asr-1.7b', 'qwen3-asr-0.6b', 'parakeet-tdt_ctc-0.6b-ja', 'reazonspeech-nemo-v2', 'parakeet-tdt-0.6b-v3', 'haas-ja-v1.0'] as const
 
 export type AsrModel = (typeof ASR_MODELS)[number]
 export type ResolvedAsrModel = Exclude<AsrModel, 'auto'>
@@ -30,8 +30,8 @@ export interface AsrModelSpec {
 const QWEN3_ASR_LANGUAGES = ['ar', 'cs', 'da', 'de', 'el', 'en', 'es', 'fa', 'fi', 'fil', 'fr', 'hi', 'hu', 'id', 'it', 'ja', 'ko', 'mk', 'ms', 'nl', 'pl', 'pt', 'ro', 'ru', 'sv', 'th', 'tr', 'vi', 'yue', 'zh']
 
 /**
- * The models in the order the screens list them: Qwen3-ASR in Q8_0, and the FastConformer models in F16, which take
- * a language only to check it. On an Apple M5 with Metal and speech.cpp 0.7.1, through ASIST's worker client with
+ * The models in the order the screens list them, using the weight types of the bundled catalog. FastConformer
+ * takes a language only to check it. On an Apple M5 with Metal and speech.cpp 0.7.1, through ASIST's worker client with
  * the language forced (2026-10-07), Qwen3-ASR 1.7B took 0.62 to 0.74 s for a FLEURS utterance of 10.5 s and 2.1 to
  * 2.6 s for one of 25.5 s, in 2.5 GB; 0.6B took 0.27 to 0.31 s and 0.87 to 1.01 s, in 1.1 GB. For the first 20 s of
  * the 25.5 s one, the longest utterance ASIST sends, parakeet-tdt_ctc-0.6b-ja took 0.24 s and ReazonSpeech 0.36 to
@@ -70,6 +70,12 @@ export const ASR_MODEL_SPECS: Readonly<Record<ResolvedAsrModel, AsrModelSpec>> =
     family: 'fastconformer',
     model: 'parakeet-tdt-0.6b-v3',
     languages: ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'et', 'fi', 'fr', 'hr', 'hu', 'it', 'lt', 'lv', 'mt', 'nl', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sv', 'uk']
+  },
+  'haas-ja-v1.0': {
+    label: 'Haas-ja-v1.0',
+    family: 'fastconformer',
+    model: 'haas-ja-v1.0',
+    languages: ['ja']
   }
 }
 
@@ -122,12 +128,12 @@ export function asrModelRecognizes(locale: ConversationLocale, model: AsrModel):
 }
 
 /** Which model a backend recommends for this much memory: the Mac's for metal, the GPU's for vulkan. */
-export const asrRecommendationSize = (backend: SpeechBackend, totalMemoryGb: number): AsrRecommendationSize =>
-  totalMemoryGb >= LARGER_FROM_GB[backend] ? 'larger' : 'smaller'
+export const asrRecommendationSize = (backend: SpeechBackend, totalMemoryGb: number, memoryType: SpeechMemory = backend === 'metal' ? 'shared' : 'dedicated'): AsrRecommendationSize =>
+  !(backend === 'vulkan' && memoryType === 'shared') && totalMemoryGb >= LARGER_FROM_GB[backend] ? 'larger' : 'smaller'
 
 /** The model for a machine whose local speech has this much memory. */
-export function recommendAsrModel(backend: SpeechBackend, totalMemoryGb: number): AsrHardwareRecommendation {
-  return { totalMemoryGb, recommendedModel: AUTOMATIC_MODELS[asrRecommendationSize(backend, totalMemoryGb)] }
+export function recommendAsrModel(backend: SpeechBackend, totalMemoryGb: number, memoryType: SpeechMemory = backend === 'metal' ? 'shared' : 'dedicated'): AsrHardwareRecommendation {
+  return { totalMemoryGb, recommendedModel: AUTOMATIC_MODELS[asrRecommendationSize(backend, totalMemoryGb, memoryType)] }
 }
 
 /** The model a setting stands for: `auto` is the recommendation, any other value that model. */

@@ -60,7 +60,7 @@ export function prepareSetupDemo(api: RendererApi, variant: SetupDemoVariant): v
     if (!engineChosen) {
       engineChosen = true
       const settings = await base.getSettings()
-      await base.saveSettings({ ttsEngine: defaultTtsEngine(settings.conversationLocale, platformCapabilities().localSpeech) })
+      await base.saveSettings({ ttsEngine: defaultTtsEngine(settings.conversationLocale, platformCapabilities().localTts) })
     }
     return unfinished(await base.getSettings())
   }

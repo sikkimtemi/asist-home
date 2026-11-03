@@ -38,9 +38,9 @@ let progressListener: (progress: PreparationProgress) => void = () => {}
  * a GPU for it, and otherwise the model the setting stands for beside the one main recommends for the memory it has.
  */
 const asrStatus = (): SetupStatus['asr'] => {
-  const { localSpeech } = platformCapabilities()
-  if (localSpeech.backend === null) return null
-  const recommendation = recommendAsrModel(localSpeech.backend, localSpeech.memoryGb)
+  const { localAsr } = platformCapabilities()
+  if (localAsr.backend === null) return null
+  const recommendation = recommendAsrModel(localAsr.backend, localAsr.memoryGb, localAsr.memoryType)
   const resolvedModel = resolveAsrModel(settings.asrModel, recommendation)
   const spec = asrModelSpec(resolvedModel)
   return {
@@ -48,7 +48,7 @@ const asrStatus = (): SetupStatus['asr'] => {
     resolvedModel,
     recommendedModel: recommendation.recommendedModel,
     label: spec.label,
-    totalMemoryGb: localSpeech.memoryGb,
+    totalMemoryGb: localAsr.memoryGb,
     modelInstalled: false,
     downloadGb: asrDownloadGb(spec, TEST_SPEECH_CATALOG, false),
     ready: false
@@ -736,7 +736,8 @@ describe('first-run setup on Windows with an NVIDIA GPU', () => {
       option('qwen3-asr-1.7b'),
       option('qwen3-asr-0.6b'),
       option('parakeet-tdt_ctc-0.6b-ja'),
-      option('reazonspeech-nemo-v2')
+      option('reazonspeech-nemo-v2'),
+      option('haas-ja-v1.0')
     ])
   })
 
@@ -788,7 +789,7 @@ describe('first-run setup on a machine without the local models', () => {
     await press(ja('setup.speaking.voice.title'))
     await press(ja('setup.next'))
     expect(optionTitles()).toEqual([ja('setup.listening.local.title')])
-    expect(container.querySelector('.su-body')?.textContent).toContain(ja('speechRecognition.unavailable.noDiscreteGpu'))
+    expect(container.querySelector('.su-body')?.textContent).toContain(ja('speechRecognition.unavailable.noGpu'))
 
     await press(ja('setup.listening.local.title'))
     await press(ja('setup.listening.prepareModel'))

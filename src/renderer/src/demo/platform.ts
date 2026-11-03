@@ -40,6 +40,7 @@ export function demoOs(search: string): OsFamily {
 export function demoSpeechDevices(search: string): SpeechDevice[] | null {
   const reason = new URLSearchParams(search).get('gpu')
   if (reason === null) return DEMO_DEVICES
+  if (reason === 'integrated') return [{ name: 'Vulkan0', description: 'AMD Radeon(TM) Graphics', kind: 'igpu', memoryTotal: 17135828992 }, DEMO_DEVICES[1]]
   const reasons = Object.keys(LOCAL_SPEECH_UNAVAILABLE_TEXT)
   if (!reasons.includes(reason)) throw new Error(`GPU は ${reasons.join(' / ')} で指定します: ${reason}`)
   return reason === 'gpu-check-failed' ? null : DEMO_DEVICES.filter((device) => device.kind !== 'gpu')

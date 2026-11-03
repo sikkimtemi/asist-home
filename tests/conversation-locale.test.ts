@@ -79,18 +79,18 @@ describe('locale helpers', () => {
 
   it('starts Japanese on Irodori-TTS and another language on Qwen3-TTS where a local engine has the memory', () => {
     for (const machine of [MACOS, WINDOWS]) {
-      expect(defaultTtsEngine('ja-JP', machine.localSpeech)).toBe('irodori')
-      expect(defaultTtsEngine('en-US', machine.localSpeech)).toBe('qwen3tts')
+      expect(defaultTtsEngine('ja-JP', machine.localTts)).toBe('irodori')
+      expect(defaultTtsEngine('en-US', machine.localTts)).toBe('qwen3tts')
       // Qwen3-TTS has no Hindi, so Hindi starts on the OS's voice.
-      expect(defaultTtsEngine('hi-IN', machine.localSpeech)).toBe('system')
+      expect(defaultTtsEngine('hi-IN', machine.localTts)).toBe('system')
     }
   })
 
   it('starts Japanese on VOICEVOX and another language on the OS\'s voice where no local engine is offered', () => {
     const smallMac = deriveCapabilities({ platform: 'darwin', arch: 'arm64', totalMemoryBytes: 8 * 1024 ** 3, speechDevices: () => null, micCancelsEcho: () => true })
     for (const machine of [smallMac, WINDOWS_WITHOUT_GPU]) {
-      expect(defaultTtsEngine('ja-JP', machine.localSpeech)).toBe('voicevox')
-      expect(defaultTtsEngine('en-US', machine.localSpeech)).toBe('system')
+      expect(defaultTtsEngine('ja-JP', machine.localTts)).toBe('voicevox')
+      expect(defaultTtsEngine('en-US', machine.localTts)).toBe('system')
     }
   })
 

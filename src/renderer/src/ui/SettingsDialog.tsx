@@ -189,8 +189,8 @@ export function SettingsDialog({ open }: { open: boolean }): React.JSX.Element {
       })
   }
 
-  const { localSpeech } = platformCapabilities()
-  const pending = pendingItems({ settings, status, vap, embedding, aizuchiClassifier, localSpeech })
+  const { localAsr, localTts } = platformCapabilities()
+  const pending = pendingItems({ settings, status, vap, embedding, aizuchiClassifier, localAsr, localTts })
   const ctx: SettingsContext = { settings, status, setup, vap, embedding, aizuchiClassifier, prep, pending, set, save, refreshStatus, go: setPage, prepare }
 
   // The one-line note beside each entry in the list on the left, which tells the gist without opening

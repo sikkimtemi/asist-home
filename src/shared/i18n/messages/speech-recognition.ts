@@ -57,6 +57,19 @@ export const speechRecognition = defineMessages({
         'es-419': 'Con {memoryGb} GB de memoria en la GPU, se recomienda Qwen3-ASR 0.6B, que funciona con unos 1.9 GB.',
         'es-ES': 'Con {memoryGb} GB de memoria en la GPU, se recomienda Qwen3-ASR 0.6B, que funciona con unos 1,9 GB.'
       }
+    },
+    sharedGpu: {
+      'ja-JP': '内蔵 GPU はメモリをほかの処理と共有するため、自動では小さい Qwen3-ASR 0.6B を使います。日本語では Haas-ja-v1.0 も選べます。',
+      'en-US': 'The integrated GPU shares memory with other tasks, so automatic selection uses the smaller Qwen3-ASR 0.6B. Haas-ja-v1.0 is also available for Japanese.',
+      'fr-FR': 'Le GPU intégré partage sa mémoire avec les autres tâches. Le choix automatique utilise donc le plus petit modèle, Qwen3-ASR 0.6B. Haas-ja-v1.0 est aussi disponible pour le japonais.',
+      'de-DE': 'Die integrierte GPU teilt ihren Speicher mit anderen Aufgaben. Die automatische Auswahl verwendet daher das kleinere Qwen3-ASR 0.6B. Für Japanisch ist auch Haas-ja-v1.0 verfügbar.',
+      'hi-IN': 'इंटीग्रेटेड GPU की मेमोरी दूसरे कामों में भी लगती है, इसलिए अपने-आप छोटे Qwen3-ASR 0.6B का चयन होता है। जापानी के लिए Haas-ja-v1.0 भी चुन सकते हैं।',
+      'id-ID': 'GPU terintegrasi berbagi memori dengan tugas lain, jadi pilihan otomatis memakai Qwen3-ASR 0.6B yang lebih kecil. Haas-ja-v1.0 juga tersedia untuk bahasa Jepang.',
+      'it-IT': 'La GPU integrata condivide la memoria con altre attività, quindi la scelta automatica usa il modello più piccolo Qwen3-ASR 0.6B. Per il giapponese è disponibile anche Haas-ja-v1.0.',
+      'ko-KR': '내장 GPU는 다른 작업과 메모리를 공유하므로 자동 선택은 더 작은 Qwen3-ASR 0.6B를 사용합니다. 일본어에는 Haas-ja-v1.0도 선택할 수 있습니다.',
+      'pt-BR': 'A GPU integrada compartilha memória com outras tarefas, então a seleção automática usa o Qwen3-ASR 0.6B, menor. O Haas-ja-v1.0 também está disponível para japonês.',
+      'es-419': 'La GPU integrada comparte memoria con otras tareas, por eso la selección automática usa el modelo más pequeño Qwen3-ASR 0.6B. También está disponible Haas-ja-v1.0 para japonés.',
+      'es-ES': 'La GPU integrada comparte memoria con otras tareas, por lo que la selección automática usa el modelo más pequeño Qwen3-ASR 0.6B. También está disponible Haas-ja-v1.0 para japonés.'
     }
   },
   errors: {
@@ -360,6 +373,19 @@ export const speechRecognition = defineMessages({
       'pt-BR': 'Este reconhecimento de fala precisa de uma GPU dedicada, e nenhuma foi encontrada neste computador. Use o Whisper no navegador.',
       'es-419': 'Este reconocimiento de voz necesita una GPU dedicada y no se encontró ninguna en esta computadora. Usa Whisper en el navegador en su lugar.',
       'es-ES': 'Este reconocimiento de voz necesita una GPU dedicada y no se ha encontrado ninguna en este ordenador. Usa Whisper en el navegador en su lugar.'
+    },
+    noGpu: {
+      'ja-JP': '利用できる Vulkan GPU が見つかりませんでした。GPU のドライバーを確認するか、ブラウザ内 Whisper を使ってください。',
+      'en-US': 'No usable Vulkan GPU was found. Check the GPU driver or use in-browser Whisper.',
+      'fr-FR': 'Aucun GPU Vulkan utilisable n’a été trouvé. Vérifiez le pilote du GPU ou utilisez Whisper dans le navigateur.',
+      'de-DE': 'Es wurde keine nutzbare Vulkan-GPU gefunden. Prüfen Sie den GPU-Treiber oder verwenden Sie Whisper im Browser.',
+      'hi-IN': 'इस्तेमाल करने योग्य Vulkan GPU नहीं मिला। GPU ड्राइवर जाँचें या ब्राउज़र में Whisper इस्तेमाल करें।',
+      'id-ID': 'Tidak ditemukan GPU Vulkan yang dapat digunakan. Periksa driver GPU atau gunakan Whisper dalam browser.',
+      'it-IT': 'Nessuna GPU Vulkan utilizzabile trovata. Controlla il driver della GPU o usa Whisper nel browser.',
+      'ko-KR': '사용 가능한 Vulkan GPU를 찾지 못했습니다. GPU 드라이버를 확인하거나 브라우저 내 Whisper를 사용하세요.',
+      'pt-BR': 'Nenhuma GPU Vulkan utilizável foi encontrada. Confira o driver da GPU ou use o Whisper no navegador.',
+      'es-419': 'No se encontró una GPU Vulkan utilizable. Revisa el controlador de la GPU o usa Whisper en el navegador.',
+      'es-ES': 'No se ha encontrado una GPU Vulkan utilizable. Comprueba el controlador de la GPU o usa Whisper en el navegador.'
     }
   },
   modelOption: {

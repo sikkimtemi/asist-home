@@ -28,7 +28,7 @@ let worker: Worker
 beforeEach(() => {
   worker = fakeWorker()
   mocks.spawn.mockReset().mockImplementation(() => {
-    setTimeout(() => say(worker, { type: 'ready', protocol: 3, version: '0.8.1', model: { task: 'recognition', sample_rate: 16_000 } }), 0)
+    setTimeout(() => say(worker, { type: 'ready', protocol: 4, version: '0.10.1', model: { task: 'recognition', sample_rate: 16_000 } }), 0)
     return worker
   })
 })

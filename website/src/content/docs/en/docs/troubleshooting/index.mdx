@@ -69,10 +69,12 @@ When MaAI's processing is slower than the audio of the conversation on average o
 
 ## Windows offers no speech recognition model
 
-On Windows, speech recognition, and Irodori-TTS and Qwen3-TTS for reading aloud, need a discrete GPU on your computer, whether from NVIDIA, AMD or Intel Arc. When there is none they can use, "Listening" in the first-time setup and "Voice" in the settings show the reason in place of the model, and Irodori-TTS and Qwen3-TTS cannot be chosen for reading aloud either. ASIST checks the GPU when it starts.
+Windows recognition needs a discrete or integrated GPU exposed by a Vulkan driver. If none is usable, "Listening" in setup and "Voice" in settings show the reason. ASIST checks the GPU at startup.
 
-- If it says "This speech recognition needs a discrete GPU, and none was found on this computer.", the Vulkan driver shows no discrete GPU. A GPU built into the processor is not used. If your computer has a discrete GPU, install its maker's driver again and start ASIST again. Without a discrete GPU, use Whisper running in the browser for speech recognition, or choose [Gemini Live](/en/docs/settings/voice-engine/) as the voice engine.
-- If it says "Couldn't check the GPU, so this speech recognition is unavailable.", ASIST could not read the list of GPUs. Make sure the GPU driver is working and start ASIST again.
+- If it says "No usable Vulkan GPU was found.", check the GPU maker’s driver and restart ASIST. Without a usable GPU, choose in-browser Whisper or [Gemini Live](/en/docs/settings/voice-engine/).
+- If the GPU could not be checked, ASIST could not read the device list. Check the driver and restart ASIST.
+
+For Japanese recognition on integrated graphics, you can choose Haas-ja-v1.0. Irodori-TTS and Qwen3-TTS still require a discrete GPU. On a PC with integrated graphics alone, use Windows voice, VOICEVOX or AivisSpeech for reading aloud.
 
 The first start of a new version of ASIST, and the first start after a GPU driver update, is when the driver builds the programs that run on the GPU. Only that time, preparing and starting speech recognition and reading aloud (Irodori-TTS and Qwen3-TTS) take longer than usual. From the second start on, the driver uses what it saved.
 

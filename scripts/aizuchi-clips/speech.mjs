@@ -4,6 +4,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import readline from 'node:readline'
 import { ASR_MODEL_SPECS } from '../../src/shared/asr-models.ts'
+import { WORKER_PROTOCOL } from '../../src/shared/speech-worker-protocol.ts'
 import { parseSpeechCatalog } from '../../src/shared/speech-catalog.ts'
 import { IRODORI_TTS_MODEL, IRODORI_TTS_VOICE_IDS, QWEN_TTS_MODELS } from '../../src/shared/tts-models.ts'
 import { RATE } from './cut.mjs'
@@ -60,9 +61,6 @@ function workerArgs(engine) {
   const voices = IRODORI_TTS_VOICE_IDS.flatMap((voice) => ['--add-voice', `${voice}=${path.join(root, 'resources', 'irodori-voices', `${voice}.voice.gguf`)}`])
   return ['worker', modelPath(IRODORI_TTS_MODEL.model), ...voices]
 }
-
-/** The version of speech.cpp's worker protocol the scripts speak, as the app's client does. */
-const WORKER_PROTOCOL = 3
 
 /** The `error` member of `error` and `fatal`, written as speech's command line writes a failure. */
 const describeError = ({ code, option, message }) => `${code}${typeof option === 'string' ? ` (${option})` : ''}: ${message}`

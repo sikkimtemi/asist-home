@@ -67,6 +67,17 @@ beforeEach(() => {
 })
 
 describe('a conversation request on the ChatGPT plan', () => {
+  it.each(['gpt-6-luna', 'gpt-6.1-terra'])(
+    'streams %s with its selected reasoning effort and tool namespace', async (id) => {
+      const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
+      const result = await chatgptAdapter.stream(request({ model: { provider: 'chatgpt', id, effort: 'max' } }), credential('access-1')).final()
+      const body = created(mocks.opened[0])
+      expect(body).toMatchObject({ model: id, reasoning: { effort: 'max' }, store: false })
+      expect(body.tools).toContainEqual(expect.objectContaining({ type: 'namespace', name: 'asist' }))
+      expect(result.message.parts).toEqual([{ type: 'text', text: '晴れです。' }])
+    }
+  )
+
   it('groups the tools in a namespace, leaves out the output cap and keeps the cache together', async () => {
     const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
     const history = request({
@@ -140,6 +151,19 @@ describe('a conversation request on the ChatGPT plan', () => {
 })
 
 describe('a one-shot JSON request on the ChatGPT plan', () => {
+  it('uses the bridge default and its shallow effort for structured output', async () => {
+    const { defaultModelsFor, effortFor } = await import('@shared/llm-catalog')
+    const { bridgeModel } = defaultModelsFor('chatgpt')
+    mocks.answer = () => completedResponse('{"bridge":"確認しますね。"}')
+    const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
+    const response = await chatgptAdapter.completeJson(
+      { model: bridgeModel, system: 'S', user: 'U', schema: { type: 'object' }, maxTokens: 100, signal: new AbortController().signal },
+      credential('access-1')
+    )
+    expect(created(mocks.opened[0])).toMatchObject({ model: bridgeModel.id, reasoning: { effort: effortFor(bridgeModel) }, text: { format: { type: 'json_schema', strict: true } } })
+    expect(response.value()).toEqual({ bridge: '確認しますね。' })
+  })
+
   it('is streamed with the schema and returns the JSON and the usage', async () => {
     mocks.answer = () => completedResponse('{"bridge":true}')
     const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
@@ -156,15 +180,30 @@ describe('a one-shot JSON request on the ChatGPT plan', () => {
 })
 
 describe('checking a model on the ChatGPT plan', () => {
-  it('accepts a model the account lists and refuses one it lists only as hidden', async () => {
+  it('validates both defaults for an account that has only the legacy Terra and Luna models', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      models: ['gpt-5.6-terra', 'gpt-5.6-luna'].map((slug) => ({ slug, visibility: 'list' }))
+    }), { status: 200 })))
+    try {
+      const { defaultModelsFor } = await import('@shared/llm-catalog')
+      const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
+      for (const model of Object.values(defaultModelsFor('chatgpt'))) {
+        await expect(chatgptAdapter.retrieveModel(model.id, credential('access-1'), new AbortController().signal)).resolves.toBeUndefined()
+      }
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it.each(['gpt-5.6-terra', 'gpt-6.1-terra', 'gpt-6-luna'])('accepts listed %s and refuses a hidden model', async (id) => {
     const fetchMock = vi.fn(async () =>
-      new Response(JSON.stringify({ models: [{ slug: 'gpt-5.6-terra', visibility: 'list' }, { slug: 'gpt-reserve', visibility: 'hide' }] }), { status: 200 })
+      new Response(JSON.stringify({ models: [{ slug: id, visibility: 'list' }, { slug: 'gpt-reserve', visibility: 'hide' }] }), { status: 200 })
     )
     vi.stubGlobal('fetch', fetchMock)
     try {
       const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
       const signal = new AbortController().signal
-      await expect(chatgptAdapter.retrieveModel('gpt-5.6-terra', credential('access-1'), signal)).resolves.toBeUndefined()
+      await expect(chatgptAdapter.retrieveModel(id, credential('access-1'), signal)).resolves.toBeUndefined()
       const refused = await chatgptAdapter.retrieveModel('gpt-reserve', credential('access-1'), signal).catch((caught: unknown) => caught)
       const classified = classifyApiKeyValidationError(refused, { label: 'MODEL', provider: 'chatgpt', id: 'gpt-reserve' })
       expect(classified.message).toBe(errorText('chatgpt.errors.modelNotListed', { target: 'MODEL (gpt-reserve)' }))

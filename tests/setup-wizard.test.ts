@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AppSettings, AppStatus, PreparationProgress, SetupStatus } from '@shared/ipc'
 import { createTranslator, type Translate, type UiLocale } from '@shared/i18n'
 import { errorText } from '@shared/i18n/error-text'
+import { defaultModelsFor } from '@shared/llm-catalog'
 import { SetupWizard } from '../src/renderer/src/ui/SetupWizard'
 import { useSettingsStore, useStatusStore } from '../src/renderer/src/state/stores'
 import { voiceController } from '../src/renderer/src/voice/VoiceController'
@@ -368,10 +369,7 @@ describe('first-run setup', () => {
     await press(ja('setup.model.verifyAndSave'))
 
     expect(api.saveApiKey).toHaveBeenCalledWith('openai', 'sk-test')
-    expect(api.saveSettings).toHaveBeenCalledWith({
-      conversationModel: { provider: 'openai', id: 'gpt-5.6-terra' },
-      bridgeModel: { provider: 'openai', id: 'gpt-5.6-luna' }
-    })
+    expect(api.saveSettings).toHaveBeenCalledWith(defaultModelsFor('openai'))
     expect(button(ja('setup.next')).disabled).toBe(false)
   })
 
@@ -509,10 +507,7 @@ describe('first-run setup with ChatGPT', () => {
 
     await press(ja('chatgpt.signIn.continue'))
     expect(api.chatgptSignIn).toHaveBeenCalledWith(false)
-    expect(api.saveSettings).toHaveBeenCalledWith({
-      conversationModel: { provider: 'chatgpt', id: 'gpt-5.6-terra' },
-      bridgeModel: { provider: 'chatgpt', id: 'gpt-5.6-luna' }
-    })
+    expect(api.saveSettings).toHaveBeenCalledWith(defaultModelsFor('chatgpt'))
     expect(container.querySelector('.su-result')?.textContent).toContain(ja('setup.model.signedInNote'))
     expect(container.querySelector('.su-next')?.textContent).toBe(ja('setup.guide.model.signedIn'))
     expect(button(ja('setup.next')).disabled).toBe(false)
@@ -524,10 +519,7 @@ describe('first-run setup with ChatGPT', () => {
     await chooseChatGpt()
     await press(ja('chatgpt.signIn.continue'))
     expect(api.chatgptSignIn).not.toHaveBeenCalled()
-    expect(api.saveSettings).toHaveBeenCalledWith({
-      conversationModel: { provider: 'chatgpt', id: 'gpt-5.6-terra' },
-      bridgeModel: { provider: 'chatgpt', id: 'gpt-5.6-luna' }
-    })
+    expect(api.saveSettings).toHaveBeenCalledWith(defaultModelsFor('chatgpt'))
     expect(button(ja('setup.next')).disabled).toBe(false)
   })
 

@@ -7,7 +7,7 @@ describe('how the reasoning effort is decided', () => {
     expect(effortFor({ provider: 'anthropic', id: 'claude-sonnet-5' })).toBe('low')
     expect(effortFor({ provider: 'anthropic', id: 'claude-opus-5' })).toBe('low')
     expect(effortFor({ provider: 'anthropic', id: 'claude-haiku-4-5' })).toBeNull()
-    expect(effortFor({ provider: 'openai', id: 'gpt-5.6-sol' })).toBe('low')
+    expect(effortFor({ provider: 'openai', id: 'gpt-5.6-terra' })).toBe('low')
     for (const model of CONVERSATION_MODELS) {
       expect(model.defaultEffort === null).toBe(model.efforts.length === 0)
       if (model.defaultEffort) expect(model.efforts).toContain(model.defaultEffort)
@@ -22,6 +22,13 @@ describe('how the reasoning effort is decided', () => {
     expect(() => effortFor({ provider: 'anthropic', id: 'claude-haiku-4-5', effort: 'low' })).toThrow(
       errorText('llmModels.errors.effortUnsupported', { model: 'Anthropic · Claude Haiku 4.5' })
     )
+  })
+  it.each(['openai', 'chatgpt'] as const)('accepts deeper reasoning on GPT-6 models from %s without expanding GPT-5.6 choices', (provider) => {
+    for (const id of ['gpt-6-luna', 'gpt-6.1-terra']) {
+      expect(effortFor({ provider, id, effort: 'xhigh' })).toBe('xhigh')
+      expect(effortFor({ provider, id, effort: 'max' })).toBe('max')
+    }
+    expect(() => effortFor({ provider, id: 'gpt-5.6-terra', effort: 'max' })).toThrow()
   })
   it('decides the effort of an id that is not in the catalog from the rules of the provider', () => {
     expect(effortOptions({ provider: 'anthropic', id: 'claude-opus-4-8' })).toEqual(['low', 'medium', 'high', 'xhigh', 'max'])

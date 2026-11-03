@@ -46,6 +46,19 @@ describe('the price of a response', () => {
     expect(llmCost({ provider: 'google', id: 'gemini-3.8-flash' }, usage({ webSearches: 2 }))).toBeCloseTo(0.028)
   })
 
+  it.each([
+    ['gpt-6-luna', 0.1, 0.01, 0.125, 0.5],
+    ['gpt-6.1-terra', 1, 0.05, 1.25, 5]
+  ] as const)('prices %s caches and long context while keeping ChatGPT plan usage unpriced', (id, input, read, write, output) => {
+    const tokens = usage({ input: 50_000, cacheRead: 50_000, cacheCreation: 50_000, output: 10_000, webSearches: 2 })
+    const promptCost = 0.05 * (input + read + write)
+    expect(llmCost({ provider: 'openai', id }, tokens)).toBeCloseTo(promptCost + 0.01 * output + 0.02)
+    expect(llmCost({ provider: 'openai', id }, { ...tokens, cacheRead: 200_000 })).toBeCloseTo(
+      (0.05 * input + 0.2 * read + 0.05 * write) * 2 + 0.01 * output * 1.5 + 0.02
+    )
+    expect(llmCost({ provider: 'chatgpt', id }, tokens)).toBeNull()
+  })
+
   it('has no price for a model the list does not have', () => {
     expect(llmCost({ provider: 'openai', id: 'my-own-model' }, usage({ input: 10 }))).toBeNull()
   })

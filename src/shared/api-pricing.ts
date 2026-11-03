@@ -5,6 +5,7 @@ import { isApiKeyProvider, type ApiKeyProvider, type ConversationModel } from '.
  * The list prices of the conversation models, in USD per million tokens, from each provider's pricing
  * page on 2026-09-23 at the standard tier. The live engine's prices are in voice-engine, and the agent
  * CLIs report their own cost.
+ * GPT-6 and GPT-6.1 prices are checked on 2026-11-03.
  *
  * - Anthropic: the cache write is the five-minute price, because every breakpoint the adapter places
  *   is `ephemeral` without a ttl.
@@ -38,6 +39,8 @@ const MODEL_PRICES: Record<string, ModelPrice> = {
   'openai:gpt-5.6-luna': { input: 0.2, cacheRead: 0.02, cacheWrite: 0.25, output: 1.2, longContext: OPENAI_LONG_CONTEXT },
   'openai:gpt-5.6-terra': { input: 2, cacheRead: 0.2, cacheWrite: 2.5, output: 12, longContext: OPENAI_LONG_CONTEXT },
   'openai:gpt-5.6-sol': { input: 4, cacheRead: 0.4, cacheWrite: 5, output: 20, longContext: OPENAI_LONG_CONTEXT },
+  'openai:gpt-6-luna': { input: 0.1, cacheRead: 0.01, cacheWrite: 0.125, output: 0.5, longContext: OPENAI_LONG_CONTEXT },
+  'openai:gpt-6.1-terra': { input: 1, cacheRead: 0.05, cacheWrite: 1.25, output: 5, longContext: OPENAI_LONG_CONTEXT },
   'google:gemini-3.8-flash': { input: 0.75, cacheRead: 0.075, cacheWrite: 0, output: 3.75 },
   'google:gemini-3.5-flash-lite': { input: 0.3, cacheRead: 0.03, cacheWrite: 0, output: 2.5 },
   'cerebras:qwen-3.8-27b': { input: 0.99, cacheRead: 0.99, cacheWrite: 0.99, output: 1.49 },

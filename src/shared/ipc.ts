@@ -3,6 +3,7 @@ import type { AgentStreamEvent } from './agent-stream'
 import type { UsageDay } from './api-usage'
 import type { AppUpdateState } from './app-update'
 import type { CalendarChange, CalendarChangeResult, CalendarEvent, CalendarListRange, CalendarStatus } from './calendar'
+import type { CalendarReminderStatus } from './calendar-reminders'
 import type { ChatGptSignInResult, ChatGptStatus } from './chatgpt'
 import type { ConfirmEvent, ConfirmRequest } from './confirm'
 import type { MiniAppTarget, MiniAppView } from './mini-apps'
@@ -360,6 +361,8 @@ export type TurnEvent =
       origin: 'user' | 'interject' | 'live'
       /** Matches the start request the renderer issued. It is set on user turns only. */
       requestId?: string
+      /** A scheduler request shown separately from the model's instructions and from real user input. */
+      schedulerInput?: string
     }
   | { type: 'segment'; turnId: number; segment: SpeechSegment }
   /** The next mono samples of the streamed segment `index`. `last` closes the segment, and its `samples` may be empty. */
@@ -963,6 +966,10 @@ export const IpcChannel = {
   SpeechModelNotices: 'speech-model-notices',
   SetupProgress: 'setup-progress',
   CalendarStatus: 'calendar-status',
+  CalendarReminderStart: 'calendar-reminder-start',
+  CalendarReminderStatus: 'calendar-reminder-status',
+  CalendarReminderChanged: 'calendar-reminder-changed',
+  CalendarReminderAcknowledge: 'calendar-reminder-acknowledge',
   CalendarRequestAccess: 'calendar-request-access',
   CalendarSignOut: 'calendar-sign-out',
   CalendarEvents: 'calendar-events',
@@ -1218,6 +1225,10 @@ export interface RendererApi {
   onJobEvent(callback: (event: JobEvent) => void): () => void
 
   calendarStatus(): Promise<CalendarStatus>
+  calendarReminderStart(): Promise<CalendarReminderStatus>
+  calendarReminderStatus(): Promise<CalendarReminderStatus>
+  calendarReminderAcknowledge(): Promise<void>
+  onCalendarReminderChanged(callback: (status: CalendarReminderStatus) => void): () => void
   /** Signs in to Google through the browser unless it already has. */
   calendarRequestAccess(): Promise<CalendarStatus>
   /** Takes back ASIST's access to Google Calendar. */

@@ -445,6 +445,31 @@ async function initializeConversation(): Promise<void> {
   if (await window.api.isLaunchPage()) void startMicAtLaunch()
 
   turn.setPhase('idle')
+  let acknowledgingMissed = false
+  const checkMissed = async (): Promise<void> => {
+    if (acknowledgingMissed) return
+    acknowledgingMissed = true
+    try {
+      if (await window.api.isWindowAway()) return
+      const status = await window.api.calendarReminderStatus()
+      if (status.missed) {
+        await window.api.calendarReminderAcknowledge()
+        feed.append({ role: 'sys', text: '', message: { key: 'calendarReminders.missed' } })
+        toasts.push({ kind: 'info', title: translate('calendarReminders.missed') })
+      }
+    } finally {
+      acknowledgingMissed = false
+    }
+  }
+  window.api.onCalendarReminderChanged(() => {
+    void checkMissed().catch((error) => console.error('Missed calendar reminder check failed:', error))
+  })
+  try {
+    await window.api.calendarReminderStart()
+    await checkMissed()
+  } catch (error) {
+    toasts.push({ kind: 'error', title: translate('calendarReminders.error'), body: displayError(error) })
+  }
 }
 
 /**
@@ -742,6 +767,7 @@ export function handleTurnEvent(event: TurnEvent): void {
     // renderer, so a system report is queued behind the current speech and the rest of the queue.
     interjectPlayback.track(event.turnId)
     activateTurn(event.turnId, null, true)
+    if (event.schedulerInput) feed.append({ role: 'user', text: event.schedulerInput, scheduler: true, turnId: event.turnId })
     return
   }
 

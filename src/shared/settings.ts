@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { calendarSettingsSchema } from './calendar'
+import { calendarReminderSettingsSchema, DEFAULT_CALENDAR_REMINDERS } from './calendar-reminders'
 import { mailSettingsSchema } from './mail'
 import { ASR_MODELS, type AsrModel } from './asr-models'
 import { dockOrderSchema } from './dock'
@@ -67,6 +68,7 @@ const fields = {
   /** How often partial recognition runs. Zero disables it. */
   partialIntervalMs: z.number().int().min(0).max(1500),
   calendar: calendarSettingsSchema,
+  calendarReminders: calendarReminderSettingsSchema,
   mail: mailSettingsSchema,
   agentCwd: z.string(),
   agentEngine: z.enum(['codex', 'claude']),
@@ -100,7 +102,8 @@ export const appSettingsSchema = z.strictObject({
   conversationLocale: fields.conversationLocale.default('ja-JP'),
   region: fields.region.default('JP'),
   qwenTtsVoice: fields.qwenTtsVoice.default('ono_anna'),
-  fileRoots: fields.fileRoots.default([])
+  fileRoots: fields.fileRoots.default([]),
+  calendarReminders: fields.calendarReminders.default(() => ({ ...DEFAULT_CALENDAR_REMINDERS }))
 })
 
 export type AppSettings = z.infer<typeof appSettingsSchema>
@@ -216,7 +219,7 @@ You are curious, and genuinely interested in their life and their work. You reme
 
 export const SETTINGS_FORMAT: StoredFormat<AppSettings> = {
   name: 'settings.json',
-  version: 14,
+  version: 15,
   upgrades: {
     // Version 2 adds the theme. Everything written before it was drawn in future.
     1: (content) => ({ ...(content as Record<string, unknown>), theme: 'future' }),
@@ -289,7 +292,8 @@ export const SETTINGS_FORMAT: StoredFormat<AppSettings> = {
     12: (content) => content,
     // Version 14 lets the speech recognition be one of speech.cpp's three FastConformer models. Every model version 13
     // allowed is allowed still, so nothing changes.
-    13: (content) => content
+    13: (content) => content,
+    14: (content) => ({ ...(content as Record<string, unknown>), calendarReminders: { ...DEFAULT_CALENDAR_REMINDERS } })
   },
   parse: parseAppSettings,
   serialize: (settings) => ({ ...settings })

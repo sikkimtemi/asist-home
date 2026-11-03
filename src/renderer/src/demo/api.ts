@@ -1,5 +1,6 @@
 import { defaultRegion } from '@shared/conversation-locale'
 import { UI_LOCALES } from '@shared/i18n'
+import { DEFAULT_CALENDAR_REMINDERS } from '@shared/calendar-reminders'
 import type {
   AppSettings,
   AppStatus,
@@ -147,6 +148,7 @@ const settings: AppSettings = {
   agentMode: 'readonly',
   fileRoots: ['/Users/demo/Desktop', '/Users/demo/Downloads'],
   calendar: { enabled: true, readCalendarIds: ['demo-work', 'demo-home', 'demo-holiday'], writeCalendarId: 'demo-work' },
+  calendarReminders: { ...DEFAULT_CALENDAR_REMINDERS },
   mail: { ...DEFAULT_MAIL_SETTINGS, enabled: true, accounts: DEMO_MAIL_ACCOUNTS, defaultAccountId: 'demo-work' },
   micAutoStart: false,
   localAsrEnabled: false,
@@ -639,6 +641,10 @@ export const mockApi: RendererApi = {
     return () => jobListeners.delete(cb)
   },
   calendarStatus: async () => DEMO_CALENDAR_STATUS,
+  calendarReminderStart: async () => ({ lastSyncedAt: null, error: null, missed: false }),
+  calendarReminderStatus: async () => ({ lastSyncedAt: null, error: null, missed: false }),
+  calendarReminderAcknowledge: async () => {},
+  onCalendarReminderChanged: () => () => {},
   calendarRequestAccess: async () => DEMO_CALENDAR_STATUS,
   calendarSignOut: async () => ({ signIn: 'signedOut', calendars: [], account: null }),
   calendarEvents: async ({ start, end }) =>

@@ -126,6 +126,10 @@ const api: RendererApi = {
   onJobEvent: subscribe<JobEvent>(IpcChannel.JobEvent),
 
   calendarStatus: () => ipcRenderer.invoke(IpcChannel.CalendarStatus),
+  calendarReminderStart: () => ipcRenderer.invoke(IpcChannel.CalendarReminderStart),
+  calendarReminderStatus: () => ipcRenderer.invoke(IpcChannel.CalendarReminderStatus),
+  calendarReminderAcknowledge: () => ipcRenderer.invoke(IpcChannel.CalendarReminderAcknowledge),
+  onCalendarReminderChanged: subscribe(IpcChannel.CalendarReminderChanged),
   calendarRequestAccess: () => ipcRenderer.invoke(IpcChannel.CalendarRequestAccess),
   calendarSignOut: () => ipcRenderer.invoke(IpcChannel.CalendarSignOut),
   calendarEvents: (range) => ipcRenderer.invoke(IpcChannel.CalendarEvents, range),

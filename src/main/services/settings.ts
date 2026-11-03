@@ -7,6 +7,7 @@ import { errorText } from '@shared/i18n/error-text'
 import type { AppSettings } from '@shared/ipc'
 import { SETTINGS_FORMAT, mergeSettings, parseAppSettings, parseSettingsPatch, type SettingsPatch } from '@shared/settings'
 import { DEFAULT_MAIL_SETTINGS } from '@shared/mail'
+import { DEFAULT_CALENDAR_REMINDERS } from '@shared/calendar-reminders'
 import { DEFAULT_DOCK_ORDER } from '@shared/dock'
 import { DEFAULT_THEME } from '@shared/themes'
 import { DEFAULT_LIVE_MODELS } from '@shared/voice-engine'
@@ -58,6 +59,7 @@ function defaultSettings(): AppSettings {
     hangoverMs: 600,
     partialIntervalMs: 600,
     calendar: { enabled: false, readCalendarIds: [], writeCalendarId: null },
+    calendarReminders: { ...DEFAULT_CALENDAR_REMINDERS },
     mail: DEFAULT_MAIL_SETTINGS,
     agentCwd: os.homedir(),
     agentEngine: 'codex',

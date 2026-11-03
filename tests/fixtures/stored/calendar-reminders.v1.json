@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "receipts": [
+    { "key": "[\"family@example.com\",\"event-1\",1792312200000,30]", "startsAt": 1792312200000, "dueAt": 1792310400000, "status": "dispatched" }
+  ],
+  "missed": false
+}

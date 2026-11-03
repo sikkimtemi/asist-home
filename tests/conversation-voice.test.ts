@@ -237,6 +237,7 @@ function api(overrides: Record<string, unknown>): unknown {
       if (key in target) return target[key]
       if (key.startsWith('on')) return () => () => {}
       if (key === 'getStatus') return async () => ({ sequence: 1, asr: 'ready', tts: 'ready' })
+      if (key === 'calendarReminderStart' || key === 'calendarReminderStatus') return async () => ({ lastSyncedAt: null, error: null, missed: false })
       if (key === 'confirmPending') return async () => []
       if (key === 'aizuchiClassifierStatus') return async () => ({ runtimeInstalled: true, modelInstalled: true, running: true })
       return async () => undefined
@@ -330,6 +331,37 @@ beforeEach(async () => {
   ;(mocks.player as { events: Emitter } | null)?.events.all.clear()
   vi.clearAllMocks()
   vi.stubGlobal('document', { addEventListener: () => {}, visibilityState: 'visible' })
+})
+
+describe('scheduled calendar input', () => {
+  it('labels scheduler input separately and preserves the existing speech queue', async () => {
+    const conversation = await start({})
+    conversation.handleTurnEvent({ type: 'started', turnId: 61, origin: 'interject', schedulerInput: t('spoken.calendarReminderRequest') })
+    expect(mocks.feed.lines).toContainEqual(expect.objectContaining({ role: 'user', text: t('spoken.calendarReminderRequest'), scheduler: true, turnId: 61 }))
+    expect(player().beginTurn).toHaveBeenCalledWith(61, true)
+  })
+
+  it('shows only a generic missed notice after restore and acknowledges it once', async () => {
+    let away = true
+    let missed = true
+    let changed!: () => void
+    const acknowledge = vi.fn(async () => { missed = false })
+    await start({
+      isWindowAway: async () => away,
+      calendarReminderStatus: async () => ({ lastSyncedAt: null, error: null, missed }),
+      calendarReminderAcknowledge: acknowledge,
+      onCalendarReminderChanged: (callback: () => void) => { changed = callback; return () => {} }
+    })
+    expect(mocks.toasts).toEqual([])
+    away = false
+    changed()
+    changed()
+    await flush()
+    expect(acknowledge).toHaveBeenCalledTimes(1)
+    expect(mocks.toasts).toEqual([{ kind: 'info', title: t('calendarReminders.missed') }])
+    expect(mocks.feed.lines).toContainEqual(expect.objectContaining({ role: 'sys', text: '', message: { key: 'calendarReminders.missed' } }))
+    expect(player().beginTurn).not.toHaveBeenCalled()
+  })
 })
 
 describe('the native microphone', () => {

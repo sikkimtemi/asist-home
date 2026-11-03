@@ -1,3 +1,5 @@
+import mitt from 'mitt'
+
 /**
  * Whether the window is away: closed to the tray or the menu bar, or minimized, which the window's own events
  * report through setWindowAway. While it is away the page keeps its microphone off, a local speech synthesis
@@ -5,6 +7,8 @@
  * spoken report waits for the window, since the OS notification has told of the job already.
  */
 
+/** Scheduler delivery follows the same native window events as microphone shutdown. */
+export const presenceEvents = mitt<{ changed: boolean }>()
 /** A window that has not shown yet counts as present: it is about to show. */
 let away = false
 let present: Array<() => void> = []
@@ -13,6 +17,7 @@ export const windowAway = (): boolean => away
 
 export function setWindowAway(next: boolean): void {
   away = next
+  presenceEvents.emit('changed', away)
   if (away) return
   const waiting = present
   present = []

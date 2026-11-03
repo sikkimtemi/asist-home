@@ -12,7 +12,7 @@ import { errorText } from '@shared/i18n/error-text'
  */
 
 /** A notice from the app, recorded separately from what the user said. */
-export type NoticeKind = 'job-done' | 'job-error'
+export type NoticeKind = 'job-done' | 'job-error' | 'calendar-reminder'
 
 /** A notice from the app as the model is given it, with the kind the log records it under. */
 export interface SystemNotice {

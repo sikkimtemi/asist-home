@@ -11,7 +11,8 @@ import { ToolRoundExecutor, buildToolResultsMessage, type ToolRoundResult } from
 import { buildResumeMessages, buildStoppedCallMessages, resumeAfterDisconnectNote } from '@shared/turn-recovery'
 import { buildMemoryInjection, memoryIdsInToolResult, type MemoryInjection } from '@shared/memory-injection'
 import { diagnoseCacheMiss, fingerprintRequest, type CacheMissReason } from '@shared/cache-diagnosis'
-import { conversationFeatures, fillPrompt, promptText, type ConversationLocale, type PromptText } from '@shared/conversation-locale'
+import { conversationFeatures, fillPrompt, promptLanguage, promptText, type ConversationLocale, type PromptText } from '@shared/conversation-locale'
+import { createToolRegistry, executeTool } from '@shared/tool-registry'
 import { marker } from '@shared/conversation-markers'
 import { personaText } from '@shared/persona'
 import { credentialMissing, providerCredential, streamConversation } from '../llm'
@@ -48,6 +49,8 @@ import {
  */
 
 const MAX_TOOL_ROUNDS = 6
+/** Calendar data may word an announcement but can never authorize a tool call. */
+const announcementTools = createToolRegistry<ToolContext>([])
 /** The waits before retrying a transient API error such as 529 Overloaded. The number of attempts is one more than the number of delays. */
 const RETRY_DELAYS_MS = [400, 1200]
 const API_ROUND_TIMEOUT_MS = 60_000
@@ -104,6 +107,8 @@ class TurnStopError extends Error {
 export interface TurnInput {
   text: string
   notice?: NoticeKind
+  /** The concise automatic request shown on screen, separate from the model's contextual instructions. */
+  displayText?: string
 }
 
 /** Leaving `route` out uses the route the settings choose when the turn starts. */
@@ -132,6 +137,7 @@ export function beginTurn(
       type: 'started',
       turnId,
       origin,
+      ...(input.notice === 'calendar-reminder' ? { schedulerInput: input.displayText } : {}),
       requestId: options.clientRequestId
     })
     await runTurn(turnId, input, options, signal, hold, runtime.route ?? currentSpeechRoute())
@@ -159,6 +165,7 @@ async function runTurn(
   // prompt, the tools, the spoken lines and the voice of this turn keep one language even if the setting
   // changes while it runs.
   const locale: ConversationLocale = conversationLocale()
+  const announcement = input.notice === 'calendar-reminder'
   const say = translatorIn(locale)
   const recordAssistant = (
     text: string,
@@ -225,7 +232,7 @@ async function runTurn(
     const providerInfo = LLM_PROVIDER_INFO[conversationModel.provider]
     if (!providerCredential(conversationModel.provider)) throw credentialMissing(conversationModel.provider)
     // A provider without a built-in web search must not have it listed in the tool guide either.
-    toolOptions = { webSearch: providerInfo.webSearch }
+    toolOptions = { webSearch: !announcement && providerInfo.webSearch }
     history.ensureLoaded()
     signal.throwIfAborted()
     const need = history.needsCompaction()
@@ -270,7 +277,7 @@ async function runTurn(
     system = buildSystemLayers({
       locale,
       persona: personaText(getSettings()),
-      toolGuide: toolGuide(locale, toolOptions),
+      toolGuide: announcement ? '' : toolGuide(locale, toolOptions),
       memoryBlock,
       historySummary: history.summary
     })
@@ -409,11 +416,13 @@ async function runTurn(
       signal,
       locale,
       isParallel: (name) => toolRegistry(locale).find(name)?.parallel ?? false,
-      execute: (call, roundSignal) => executeClientTool(call.name, call.input, {
-        ...ctx,
-        signal: roundSignal,
-        emit: (event) => { if (!roundSignal.aborted) emit(event) }
-      }, locale, () => holdForAnswer(roundSignal)),
+      execute: (call, roundSignal) => announcement
+        ? executeTool(announcementTools, call.name, call.input, ctx, roundSignal, promptLanguage(locale))
+        : executeClientTool(call.name, call.input, {
+          ...ctx,
+          signal: roundSignal,
+          emit: (event) => { if (!roundSignal.aborted) emit(event) }
+        }, locale, () => holdForAnswer(roundSignal)),
       onStart: (call) => {
         toolCalls++
         slowToolTimer ??= setTimeout(() => playWorkFiller(round.signal), 2500)
@@ -441,7 +450,7 @@ async function runTurn(
           locale,
           maxTokens: MAX_OUTPUT_TOKENS,
           system,
-          tools: tools(locale),
+          tools: announcement ? [] : tools(locale),
           webSearch: toolOptions.webSearch,
           messages,
           signal: withTimeoutSignal(signal, API_ROUND_TIMEOUT_MS)
@@ -539,7 +548,7 @@ async function runTurn(
       const toolRound = newToolRound()
       try {
         // Only the first round fingerprints what is sent and compares it with the previous request, which gives the reason for a cache miss.
-        const fingerprint = round === 0 ? fingerprintRequest({ at: Date.now(), systemLayers: system, tools: tools(locale), messages }) : null
+        const fingerprint = round === 0 ? fingerprintRequest({ at: Date.now(), systemLayers: system, tools: announcement ? [] : tools(locale), messages }) : null
         // The clock for the text restarts each round, so time spent running tools does not count as silence during a search.
         lastTextAt = Date.now()
         let result: ConversationResult

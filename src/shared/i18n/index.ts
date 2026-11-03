@@ -2,6 +2,7 @@ import { type Message, type PluralForms, type UiLocale } from './message'
 import { app } from './messages/app'
 import { boot } from './messages/boot'
 import { calendar } from './messages/calendar'
+import { calendarReminders } from './messages/calendar-reminders'
 import { cardsFinance } from './messages/cards-finance'
 import { cardsInfo } from './messages/cards-info'
 import { cardsTime } from './messages/cards-time'
@@ -49,6 +50,7 @@ export interface MessageGroups {
   readonly app: typeof app
   readonly boot: typeof boot
   readonly calendar: typeof calendar
+  readonly calendarReminders: typeof calendarReminders
   readonly cardsFinance: typeof cardsFinance
   readonly cardsInfo: typeof cardsInfo
   readonly cardsTime: typeof cardsTime
@@ -99,6 +101,7 @@ export const MESSAGES: MessageGroups = {
   app,
   boot,
   calendar,
+  calendarReminders,
   cardsFinance,
   cardsInfo,
   cardsTime,

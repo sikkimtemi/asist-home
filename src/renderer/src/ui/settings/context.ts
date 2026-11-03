@@ -86,9 +86,9 @@ export const ttsNeedsPreparation = (engine: TtsEngine): boolean => isExternalTts
 export function speechRecognitionReady(
   settings: AppSettings,
   status: AppStatus | null,
-  localSpeech: PlatformCapabilities['localSpeech']
+  localAsr: PlatformCapabilities['localAsr']
 ): boolean | null {
-  if (localSpeech.backend === null) return settings.localAsrEnabled
+  if (localAsr.backend === null) return settings.localAsrEnabled
   return status ? speechEnginePrepared(status.asr) : null
 }
 
@@ -100,9 +100,9 @@ export function speechRecognitionReady(
 export function cascadeListeningReady(
   settings: AppSettings,
   status: AppStatus | null,
-  localSpeech: PlatformCapabilities['localSpeech']
+  localAsr: PlatformCapabilities['localAsr']
 ): boolean | null {
-  return settings.localAsrEnabled || speechRecognitionReady(settings, status, localSpeech)
+  return settings.localAsrEnabled || speechRecognitionReady(settings, status, localAsr)
 }
 
 /** How the replies of the cascade engine are read aloud, as speechReadiness tells it. */
@@ -115,9 +115,9 @@ export type SpeechReadiness = 'ready' | 'starting' | 'off' | 'missing' | 'cannot
  * each time it loads. 'missing' is an engine that cannot be reached or whose model is not
  * prepared, in which case the OS's speech synthesis reads the replies instead.
  */
-export function speechReadiness(engine: TtsEngine, status: AppStatus | null, localSpeech: PlatformCapabilities['localSpeech']): SpeechReadiness {
+export function speechReadiness(engine: TtsEngine, status: AppStatus | null, localTts: PlatformCapabilities['localTts']): SpeechReadiness {
   if (engine === 'none') return 'off'
-  if (!ttsEngineRuns(engine, localSpeech)) return 'cannotRun'
+  if (!ttsEngineRuns(engine, localTts)) return 'cannotRun'
   if (!ttsNeedsPreparation(engine)) return 'ready'
   if (status === null) return 'checking'
   if (speechEnginePrepared(status.tts)) return 'ready'

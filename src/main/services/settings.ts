@@ -44,7 +44,7 @@ function defaultSettings(): AppSettings {
     liveIdleSeconds: 90,
     persona: null,
     conversationLogRetentionDays: 90,
-    ttsEngine: defaultTtsEngine(locale, platformCapabilities().localSpeech),
+    ttsEngine: defaultTtsEngine(locale, platformCapabilities().localTts),
     irodoriTtsVoice: 'calm-young-woman',
     qwenTtsSize: '0.6b',
     voicevoxSpeaker: Number(process.env.VOICEVOX_SPEAKER || 1),

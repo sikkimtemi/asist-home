@@ -9,6 +9,7 @@ import { errorText } from '@shared/i18n/error-text'
 import { MAX_RECOGNITION_SECONDS } from '../src/main/services/asr-utterance'
 import { SPEECH_CPP_SERIES, WORKER_PROTOCOL } from '../src/main/services/speech-worker'
 import { SPEECH_MODELS_OUTPUT, TEST_SPEECH_CATALOG } from './helpers/speech-catalog'
+import { MACOS, WINDOWS_INTEGRATED, setCapabilities } from './helpers/platform'
 
 const mocks = vi.hoisted(() => ({
   spawn: vi.fn(),
@@ -81,6 +82,7 @@ beforeEach(async () => {
   asr = await import('../src/main/services/local-asr')
 })
 afterEach(() => {
+  setCapabilities(MACOS)
   vi.useRealTimers()
   asr.stop()
   vi.restoreAllMocks()
@@ -207,6 +209,28 @@ describe('the speech recognition worker', () => {
     expect(children[0].input.at(-1)).toEqual({ type: 'transcribe', id: 'r1', sample_rate: 16_000, language: 'de' })
     answer(children[0], 'r1', 'Er griff auch alles an. ')
     await expect(outcome).resolves.toBe('Er griff auch alles an.')
+  })
+
+  it('uses the Haas Q8 file on the integrated Vulkan GPU and cancels a request without using another recognizer', async () => {
+    setCapabilities(WINDOWS_INTEGRATED)
+    const spec = ASR_MODEL_SPECS['haas-ja-v1.0']
+    mocks.spawn.mockImplementation(() => {
+      const child = fakeChild()
+      children.push(child)
+      setTimeout(() => say(child, ready({ device: 'Vulkan0', name: 'Haas-ja-v1.0' })), 0)
+      return child
+    })
+    const outcome = asr.transcribe(spec, new Float32Array(1600), 'haas').catch((error: Error) => error)
+    await vi.waitFor(() => expect(children[0]?.input.at(-1)).toEqual({ type: 'transcribe', id: 'haas', sample_rate: 16_000, language: 'ja' }))
+    const [, args, options] = mocks.spawn.mock.calls[0]
+    expect(path.basename(args[1])).toBe(TEST_SPEECH_CATALOG['haas-ja-v1.0'].file)
+    expect(args.slice(-2)).toEqual(['--device', 'Vulkan0'])
+    expect(options.windowsHide).toBe(true)
+    expect(asr.cancelTranscription('haas')).toBe(true)
+    expect(await outcome).toMatchObject({ name: 'AbortError' })
+    expect(children[0].input.at(-1)).toEqual({ type: 'cancel', id: 'haas' })
+    say(children[0], { type: 'cancelled', id: 'haas' })
+    expect(children).toHaveLength(1)
   })
 
   it('reads the conversation language for each utterance, so that a change applies without loading the model again', async () => {

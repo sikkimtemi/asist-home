@@ -27,6 +27,8 @@ On a Mac with 16GB of memory or more, ASIST recommends 1.7B for speech recogniti
 
 ## Windows
 
+Recognition can also use an integrated GPU on Windows. The measurements below are for a discrete GPU; this table has no measurement of Haas runtime memory.
+
 On Windows, speech recognition and reading aloud (Irodori-TTS and Qwen3-TTS) load their models into the memory of a discrete GPU. Measured on a GeForce RTX 2080 (8GB) with Windows 11, as the use of the whole GPU that `nvidia-smi` reports, less the 1.64GB it showed with ASIST running and the microphone off. Speech recognition and 0.6B Qwen3-TTS were measured on 2026-10-07 with speech.cpp 0.7.1. Speech recognition is given after it transcribed an utterance of 25.5 seconds; just after loading, 1.7B took 2.3GB and 0.6B 0.9GB. It grows with the length of the utterance: after one of 10.5 seconds, 1.7B took 2.4GB and 0.6B 1.1GB. The three FastConformer models were measured on the same day running speech.cpp 0.7.1's `speech worker` alone, as the growth over the use before the worker started. They are given after transcribing 20 seconds, the longest utterance ASIST sends at once (the first 20 seconds of a FLEURS utterance, in Japanese for the two Japanese models and in English for parakeet-tdt-0.6b-v3); just after loading, each took 1.2GB. 0.6B Qwen3-TTS is given after it read three sentences. Irodori-TTS was measured on 2026-10-01 with speech.cpp v0.3.0, and 1.7B Qwen3-TTS on 2026-09-29 with the implementation used before.
 
 | Model | GPU memory |

@@ -34,12 +34,11 @@ export function parseSpeechDevices(output: string): SpeechDevice[] | null {
   return read
 }
 
-/** The GPU the local speech models run on, with its memory in GB, or null when there is no discrete GPU. */
-export function chooseSpeechDevice(devices: readonly SpeechDevice[]): { device: string; memoryGb: number } | null {
-  // An integrated GPU shares the machine's memory and has not been measured to keep up with speech, so
-  // only a discrete one counts; with several, the one with the most memory holds the models best.
+/** Chooses the largest discrete GPU, or the largest integrated GPU when allowed and no discrete GPU exists. */
+export function chooseSpeechDevice(devices: readonly SpeechDevice[], allowIntegrated = false): { device: string; memoryGb: number; memoryType: 'shared' | 'dedicated' } | null {
   const discrete = devices.filter((device) => device.kind === 'gpu')
-  if (discrete.length === 0) return null
-  const best = discrete.reduce((a, b) => (b.memoryTotal > a.memoryTotal ? b : a))
-  return { device: best.name, memoryGb: Math.round(best.memoryTotal / 1024 ** 3) }
+  const candidates = discrete.length > 0 ? discrete : allowIntegrated ? devices.filter((device) => device.kind === 'igpu') : []
+  if (candidates.length === 0) return null
+  const best = candidates.reduce((a, b) => (b.memoryTotal > a.memoryTotal ? b : a))
+  return { device: best.name, memoryGb: Math.round(best.memoryTotal / 1024 ** 3), memoryType: best.kind === 'igpu' ? 'shared' : 'dedicated' }
 }

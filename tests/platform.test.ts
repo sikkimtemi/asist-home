@@ -34,16 +34,17 @@ describe('what a machine can run', () => {
   it('gives an Apple Silicon Mac the local speech on Metal with its memory, the native microphone without a check and Alt+Space', () => {
     expect(deriveCapabilities(machine('darwin', 'arm64'))).toEqual({
       os: 'macos',
-      localSpeech: { backend: 'metal', device: 'MTL0', memoryGb: 16 },
+      localTts: { backend: 'metal', device: 'MTL0', memoryGb: 16, memoryType: 'shared' },
+      localAsr: { backend: 'metal', device: 'MTL0', memoryGb: 16, memoryType: 'shared' },
       nativeMic: true,
       hotkey: 'Alt+Space'
     })
   })
 
   it('counts the memory in whole GB the way the recommendations read it', () => {
-    const memory = (bytes: number) => deriveCapabilities(machine('darwin', 'arm64', [], bytes)).localSpeech
-    expect(memory(15.7 * GIB)).toEqual({ backend: 'metal', device: 'MTL0', memoryGb: 16 })
-    expect(memory(0.2 * GIB)).toEqual({ backend: 'metal', device: 'MTL0', memoryGb: 1 })
+    const memory = (bytes: number) => deriveCapabilities(machine('darwin', 'arm64', [], bytes)).localTts
+    expect(memory(15.7 * GIB)).toEqual({ backend: 'metal', device: 'MTL0', memoryGb: 16, memoryType: 'shared' })
+    expect(memory(0.2 * GIB)).toEqual({ backend: 'metal', device: 'MTL0', memoryGb: 1, memoryType: 'shared' })
   })
 
   it('never lists the devices on a Mac', () => {
@@ -52,10 +53,30 @@ describe('what a machine can run', () => {
     expect(speechDevices).not.toHaveBeenCalled()
   })
 
+  it('enables recognition on integrated Vulkan graphics while keeping synthesis unavailable and reading devices once', () => {
+    const speechDevices = vi.fn(() => [gpu('Vulkan0', 'AMD Radeon(TM) Graphics', 16, 'igpu'), CPU])
+    const capabilities = deriveCapabilities({ ...machine('win32', 'x64'), speechDevices })
+    expect(capabilities.localAsr).toEqual({ backend: 'vulkan', device: 'Vulkan0', memoryGb: 16, memoryType: 'shared' })
+    expect(capabilities.localTts).toEqual({ backend: null, reason: 'no-discrete-gpu' })
+    expect(speechDevices).toHaveBeenCalledOnce()
+  })
+
+  it('prefers discrete graphics for recognition even when integrated graphics report more shared memory', () => {
+    const capabilities = deriveCapabilities(machine('win32', 'x64', [gpu('Vulkan0', 'AMD integrated', 16, 'igpu'), gpu('Vulkan1', 'NVIDIA discrete', 8), CPU]))
+    expect(capabilities.localAsr).toEqual({ backend: 'vulkan', device: 'Vulkan1', memoryGb: 8, memoryType: 'dedicated' })
+    expect(capabilities.localAsr).toEqual(capabilities.localTts)
+  })
+
+  it('does not enable CPU recognition or hide a failure to list the GPU', () => {
+    expect(deriveCapabilities(machine('win32', 'x64', [CPU])).localAsr).toEqual({ backend: null, reason: 'no-gpu' })
+    expect(deriveCapabilities(machine('win32', 'x64', null)).localAsr).toEqual({ backend: null, reason: 'gpu-check-failed' })
+  })
+
   it('gives x64 Windows with a discrete GPU the local speech on Vulkan on that GPU with its memory, and none of the Mac-only helpers', () => {
     expect(deriveCapabilities(machine('win32', 'x64', [gpu('Vulkan0', 'NVIDIA GeForce RTX 2080', 8), CPU], 32 * GIB))).toEqual({
       os: 'windows',
-      localSpeech: { backend: 'vulkan', device: 'Vulkan0', memoryGb: 8 },
+      localTts: { backend: 'vulkan', device: 'Vulkan0', memoryGb: 8, memoryType: 'dedicated' },
+      localAsr: { backend: 'vulkan', device: 'Vulkan0', memoryGb: 8, memoryType: 'dedicated' },
       nativeMic: false,
       hotkey: expect.any(String)
     })
@@ -63,7 +84,7 @@ describe('what a machine can run', () => {
 
   it('runs the local speech on the discrete GPU with the most memory, never on an integrated one', () => {
     const devices = [gpu('Vulkan0', 'Intel(R) UHD Graphics 770', 16, 'igpu'), gpu('Vulkan1', 'NVIDIA GeForce RTX 3060', 12), gpu('Vulkan2', 'AMD Radeon RX 7900 XTX', 24), CPU]
-    expect(deriveCapabilities(machine('win32', 'x64', devices)).localSpeech).toEqual({ backend: 'vulkan', device: 'Vulkan2', memoryGb: 24 })
+    expect(deriveCapabilities(machine('win32', 'x64', devices)).localTts).toEqual({ backend: 'vulkan', device: 'Vulkan2', memoryGb: 24, memoryType: 'dedicated' })
   })
 
   it.each([
@@ -71,7 +92,7 @@ describe('what a machine can run', () => {
     ['only the CPU is listed', [CPU], 'no-discrete-gpu'],
     ['the device list could not be read', null, 'gpu-check-failed']
   ])('gives x64 Windows no local speech when %s, with the reason', (_case, devices, reason) => {
-    expect(deriveCapabilities(machine('win32', 'x64', devices)).localSpeech).toEqual({ backend: null, reason })
+    expect(deriveCapabilities(machine('win32', 'x64', devices)).localTts).toEqual({ backend: null, reason })
   })
 
   it('gives x64 Windows the native microphone exactly when its check finds echo cancellation on, asking once', () => {

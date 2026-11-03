@@ -23,9 +23,9 @@ Apple Silicon の Mac と、macOS 14 以降が要ります。Intel の Mac で�
 
 x64 の CPU の PC と、Windows 11 が要ります。Arm の CPU の Windows には対応していません。
 
-声の聞き取りと、読み上げの Irodori-TTS と Qwen3-TTS をこのコンピュータの中で動かすには、単体の GPU が要ります。NVIDIA、AMD、Intel Arc のどれでも、Vulkan のドライバーが認識する単体の GPU なら使えます。CPU に内蔵された GPU は使いません。単体の GPU が複数あるときは、メモリのいちばん多いものを使います。
+声の聞き取りには、Vulkan のドライバーが認識する単体 GPU または内蔵 GPU を使います。単体 GPU があれば優先し、複数あるときはメモリのいちばん多いものを使います。読み上げの Irodori-TTS と Qwen3-TTS には、引き続き単体 GPU が必要です。
 
-GPU のメモリが 6GB 以上なら、聞き取りに Qwen3-ASR 1.7B を勧めます。それより少なければ、聞き取りに Qwen3-ASR 0.6B を勧めます。読み上げの Irodori-TTS と Qwen3-TTS は、GPU のメモリが 8GB 以上なら勧めます。初回の準備で取得するモデルは、聞き取りが約 0.8〜2.2GB、Irodori-TTS が約 1.9GB、Qwen3-TTS が約 1.2GB です。
+単体 GPU のメモリが 6GB 以上なら、聞き取りに Qwen3-ASR 1.7B を勧めます。それより少なければ、聞き取りに Qwen3-ASR 0.6B を勧めます。内蔵 GPU では自動の聞き取りは Qwen3-ASR 0.6B です。日本語では Haas-ja-v1.0(約 0.66GB)も選べます。読み上げの Irodori-TTS と Qwen3-TTS は、単体 GPU のメモリが 8GB 以上なら勧めます。初回の準備で取得するモデルは、聞き取りが約 0.8〜2.2GB、Irodori-TTS が約 1.9GB、Qwen3-TTS が約 1.2GB です。
 
 使える GPU が無くても、ASIST は使えます。聞き取りにブラウザの中で動く Whisper を使うか、声のエンジンに Gemini Live を選ぶか、文字で話しかけます。
 

@@ -22,13 +22,17 @@ export interface LocalSpeechModelInUse {
  */
 export function localSpeechModelsInUse(
   settings: Pick<AppSettings, 'voiceEngine' | 'ttsEngine' | 'qwenTtsSize' | 'asrModel'>,
-  localSpeech: PlatformCapabilities['localSpeech'],
+  capabilities: PlatformCapabilities,
   catalog: SpeechCatalog
 ): LocalSpeechModelInUse[] {
-  if (isLiveEngine(settings.voiceEngine) || localSpeech.backend === null) return []
-  const recognition = asrModelSpec(resolveAsrModel(settings.asrModel, recommendAsrModel(localSpeech.backend, localSpeech.memoryGb)))
-  const used: LocalSpeechModelInUse[] = [{ target: 'asr', label: recognition.label, files: asrModelFiles(recognition, catalog) }]
-  if (isLocalTtsEngine(settings.ttsEngine)) {
+  if (isLiveEngine(settings.voiceEngine)) return []
+  const { localAsr, localTts } = capabilities
+  const used: LocalSpeechModelInUse[] = []
+  if (localAsr.backend !== null) {
+    const recognition = asrModelSpec(resolveAsrModel(settings.asrModel, recommendAsrModel(localAsr.backend, localAsr.memoryGb, localAsr.memoryType)))
+    used.push({ target: 'asr', label: recognition.label, files: asrModelFiles(recognition, catalog) })
+  }
+  if (localTts.backend !== null && isLocalTtsEngine(settings.ttsEngine)) {
     const { label, files } = localTtsModel(settings.ttsEngine, settings.qwenTtsSize, catalog)
     used.push({ target: 'tts', label, files })
   }

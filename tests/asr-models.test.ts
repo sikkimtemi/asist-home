@@ -28,6 +28,11 @@ describe('the recommended model on a Mac', () => {
 })
 
 describe('the recommended model on a Windows GPU', () => {
+  it('does not mistake plentiful shared GPU memory for dedicated VRAM and preserves an explicit Haas selection', () => {
+    const recommendation = recommendAsrModel('vulkan', 16, 'shared')
+    expect(resolveAsrModel('auto', recommendation)).toBe('qwen3-asr-0.6b')
+    expect(resolveAsrModel('haas-ja-v1.0', recommendation)).toBe('haas-ja-v1.0')
+  })
   it('recommends Qwen3-ASR 0.6B on a 4 GB GPU, which 1.7B does not fit beside the desktop', () => {
     expect(recommendAsrModel('vulkan', 4)).toEqual({ totalMemoryGb: 4, recommendedModel: 'qwen3-asr-0.6b' })
   })
@@ -75,6 +80,11 @@ describe('the models to choose from in each conversation language', () => {
   })
 
   it('lets a chosen model recognize only the languages of its file', () => {
+    expect(asrModelRecognizes('ja-JP', 'haas-ja-v1.0')).toBe(true)
+    for (const locale of CONVERSATION_LOCALES.filter((locale) => locale !== 'ja-JP')) {
+      expect(asrModelRecognizes(locale, 'haas-ja-v1.0')).toBe(false)
+      expect(offered(locale)).not.toContain('haas-ja-v1.0')
+    }
     expect(asrModelRecognizes('ja-JP', 'reazonspeech-nemo-v2')).toBe(true)
     expect(asrModelRecognizes('en-US', 'reazonspeech-nemo-v2')).toBe(false)
     expect(asrModelRecognizes('es-419', 'parakeet-tdt-0.6b-v3')).toBe(true)
@@ -119,6 +129,12 @@ describe('the speech recognition model of an older settings file', () => {
   const sample = (version: number) =>
     JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'stored', `settings.v${version}.json`), 'utf8')) as Record<string, unknown>
   const open = (version: number, asrModel: unknown) => openStoredContent(SETTINGS_FORMAT, { ...sample(version), asrModel }).value
+
+  it('preserves the previous selection during upgrade and round-trips a Haas selection in the current format', () => {
+    expect(open(15, 'reazonspeech-nemo-v2').asrModel).toBe('reazonspeech-nemo-v2')
+    expect(open(16, 'haas-ja-v1.0').asrModel).toBe('haas-ja-v1.0')
+    expect(ASR_MODEL_SPECS['haas-ja-v1.0'].languages).toEqual(['ja'])
+  })
 
   it.each([
     ['auto', 'auto'],

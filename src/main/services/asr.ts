@@ -24,9 +24,9 @@ type Resolution =
   | { model: null; reason: LocalSpeechUnavailable }
 
 function resolve(selected: AsrModel = getSettings().asrModel): Resolution {
-  const { localSpeech } = platformCapabilities()
-  if (localSpeech.backend === null) return { model: null, reason: localSpeech.reason }
-  const recommendation = recommendAsrModel(localSpeech.backend, localSpeech.memoryGb)
+  const { localAsr } = platformCapabilities()
+  if (localAsr.backend === null) return { model: null, reason: localAsr.reason }
+  const recommendation = recommendAsrModel(localAsr.backend, localAsr.memoryGb, localAsr.memoryType)
   const model = resolveAsrModel(selected, recommendation)
   return { model, spec: asrModelSpec(model), recommendation }
 }

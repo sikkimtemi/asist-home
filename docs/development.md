@@ -16,11 +16,15 @@ npm run build
 
 `tests/local-tts-live.test.ts` は、ASIST の読み上げのクライアントから、同梱する speech のワーカーで Irodori-TTS の 3 つの声と Qwen3-TTS 0.6B に日本語の文を読ませ、準備ができるまでと最初の声までの時間を出します。モデルのファイルが要るので、ふだんは飛ばします。speech.cpp を上げたときは、アプリと同じ並び(`<owner>--<name>/<SHA-256>/<ファイル名>`)で `speech-models/` を置いたフォルダを `SPEECH_LIVE_USER_DATA` に渡して、`npx vitest run tests/local-tts-live.test.ts --silent=false --reporter=verbose` で動かします。フォルダには、手元のファイルを `cp -c` で複製して置けます。speech.cpp 0.8.2 からは、speech.cpp 自身のキャッシュも同じ並びです。
 
-モデルのファイルの固定は、同梱する speech と同じ版のカタログのファイルから読みます。テストは、speech.cpp 0.8.1 の `tools/catalog/catalog.json` を写した `tests/fixtures/speech-models.json` を使います。speech.cpp を上げたときは、その版のカタログに替えます。
+モデルのファイルの固定は、同梱する speech と同じ版のカタログのファイルから読みます。テストは、speech.cpp 0.10.1 の `tools/catalog/catalog.json` を写した `tests/fixtures/speech-models.json` を使います。speech.cpp を上げたときは、その版のカタログに替えます。
 
-`tests/local-asr-live.test.ts` は、ASIST の音声認識のクライアントから、同梱する speech のワーカーで、Qwen3-ASR の 1.7B と 0.6B と、FastConformer の 3 つのモデルに録音を書き起こさせ、それぞれの公式の実装が言語を指定して書いた文と比べます。FastConformer の公式の文は NeMo が書いた文です。モデルの言語の一覧がファイルの一覧と同じであることも確かめます。準備ができるまでと、書き起こしと途中の書き起こしにかかった時間、Mac では ASIST が一度に送るいちばん長い 20 秒の発話を書き起こしたあとのワーカーのメモリも出します。モデルのファイルと録音が要るので、ふだんは飛ばします。speech.cpp を上げたときは、`speech-models/` を置いたフォルダを `SPEECH_LIVE_USER_DATA` に、16 kHz の WAVE ファイルと公式の文の `requests.json` を置いたフォルダを `ASR_LIVE_CLIPS` に渡して、同じように動かします。ファイルか `requests.json` の行が無いモデルは飛ばします。`requests.json` の形は、テストのファイルの先頭に書いてあります。
+`tests/local-asr-live.test.ts` は、ASIST の音声認識のクライアントから、同梱する speech のワーカーで、Qwen3-ASR の 1.7B と 0.6B と、Haas を含む FastConformer の 4 つのモデルに録音を書き起こさせ、それぞれの公式の実装が言語を指定して書いた文と比べます。FastConformer の公式の文は各モデルの公式実装が書いた文です。モデルの言語の一覧がファイルの一覧と同じであることも確かめます。準備ができるまでと、書き起こしと途中の書き起こしにかかった時間、Mac では ASIST が一度に送るいちばん長い 20 秒の発話を書き起こしたあとのワーカーのメモリも出します。モデルのファイルと録音が要るので、ふだんは飛ばします。speech.cpp を上げたときは、`speech-models/` を置いたフォルダを `SPEECH_LIVE_USER_DATA` に、16 kHz の WAVE ファイルと公式の文の `requests.json` を置いたフォルダを `ASR_LIVE_CLIPS` に渡して、同じように動かします。ファイルか `requests.json` の行が無いモデルは飛ばします。`requests.json` の形は、テストのファイルの先頭に書いてあります。
 
 Windows では、`tests/memory-curation-service.test.ts` が、記憶のフォルダを 8.3 形式の短い名前(`C:\Users\RUNNER~1\…` のような名前)で書いたときにも整理を取り込めることを確かめます。テストはシステム ドライブの `%LOCALAPPDATA%\Temp` にフォルダを作り、Windows にその短い名前を聞きます。ボリュームが短い名前を作らない設定のときは、理由を出してこのテストを飛ばします。環境変数 `ASIST_REQUIRE_SHORT_NAMES=1` があるとき(CI の `test-windows`)は、飛ばさずに失敗にします。
+
+## Windows の Haas 音声認識を検証する
+
+内蔵 GPU の PC で、設定の「声」の音声認識から Haas-ja-v1.0 を選び、「準備する」を押します。日本語の会話でだけ選べます。マイクをオンにして、予定の確認、名前を含む指示、言い直し、読み上げ中の割り込みを試します。発話の終わりから認識が確定するまでの時間も確認します。マイクのオフ・オンと最小化からの復帰で再開できること、内蔵 GPU だけの PC では Irodori-TTS と Qwen3-TTS が選べないことを確認します。単体 GPU の PC では、既存のローカル TTS も確認します。
 
 ## asist-home の予定通知を検証する
 

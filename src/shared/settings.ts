@@ -219,7 +219,7 @@ You are curious, and genuinely interested in their life and their work. You reme
 
 export const SETTINGS_FORMAT: StoredFormat<AppSettings> = {
   name: 'settings.json',
-  version: 15,
+  version: 16,
   upgrades: {
     // Version 2 adds the theme. Everything written before it was drawn in future.
     1: (content) => ({ ...(content as Record<string, unknown>), theme: 'future' }),
@@ -293,7 +293,9 @@ export const SETTINGS_FORMAT: StoredFormat<AppSettings> = {
     // Version 14 lets the speech recognition be one of speech.cpp's three FastConformer models. Every model version 13
     // allowed is allowed still, so nothing changes.
     13: (content) => content,
-    14: (content) => ({ ...(content as Record<string, unknown>), calendarReminders: { ...DEFAULT_CALENDAR_REMINDERS } })
+    14: (content) => ({ ...(content as Record<string, unknown>), calendarReminders: { ...DEFAULT_CALENDAR_REMINDERS } }),
+    // Version 16 adds Haas to the recognition models and preserves every previous selection.
+    15: (content) => content
   },
   parse: parseAppSettings,
   serialize: (settings) => ({ ...settings })

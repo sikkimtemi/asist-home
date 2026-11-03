@@ -69,7 +69,7 @@ function readTold(): PinName[] {
  */
 export function takeSpeechModelNotices(): SpeechModelNotice[] {
   const told = readTold()
-  const due = localSpeechModelsInUse(getSettings(), platformCapabilities().localSpeech, speechCatalog()).filter(({ files }) => !files.every(fileInstalled) && !files.every((file) => told.some((pin) => samePin(pin, file))))
+  const due = localSpeechModelsInUse(getSettings(), platformCapabilities(), speechCatalog()).filter(({ files }) => !files.every(fileInstalled) && !files.every((file) => told.some((pin) => samePin(pin, file))))
   if (due.length === 0) return []
   const pinned = pinnedSpeechModelFiles()
   const record = told.filter((pin) => pinned.some((file) => samePin(file, pin)))

@@ -23,9 +23,9 @@ Speech recognition and the other local models run on your Mac. Speech recognitio
 
 You need a PC with an x64 processor and Windows 11. Windows on an Arm processor is not supported.
 
-To run speech recognition, and Irodori-TTS and Qwen3-TTS for reading aloud, on your computer, you need a discrete GPU. Any discrete GPU that its Vulkan driver shows can be used, whether from NVIDIA, AMD or Intel Arc. A GPU built into the processor is not used. With more than one discrete GPU, ASIST uses the one with the most memory.
+Speech recognition uses a discrete or integrated GPU exposed by its Vulkan driver. A discrete GPU takes priority; among several, ASIST chooses the one with the most memory. Irodori-TTS and Qwen3-TTS for reading aloud still require a discrete GPU.
 
-With 6 GB of GPU memory or more, Qwen3-ASR 1.7B is recommended for speech recognition. Below that, Qwen3-ASR 0.6B is recommended. Irodori-TTS and Qwen3-TTS for reading aloud are recommended with 8 GB of GPU memory or more. The first preparation downloads a model of about 0.8 to 2.2 GB for speech recognition, about 1.9 GB for Irodori-TTS and about 1.2 GB for Qwen3-TTS.
+With 6 GB of dedicated GPU memory or more, Qwen3-ASR 1.7B is recommended for speech recognition. Below that, Qwen3-ASR 0.6B is recommended. Automatic recognition uses Qwen3-ASR 0.6B on integrated GPUs. Haas-ja-v1.0 (about 0.66 GB) is also available for Japanese. Irodori-TTS and Qwen3-TTS for reading aloud are recommended with 8 GB of dedicated GPU memory or more. The first preparation downloads a model of about 0.8 to 2.2 GB for speech recognition, about 1.9 GB for Irodori-TTS and about 1.2 GB for Qwen3-TTS.
 
 You can use ASIST without a usable GPU. Use Whisper running in the browser for speech recognition, choose Gemini Live as the voice engine, or type to it.
 

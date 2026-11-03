@@ -2,7 +2,7 @@ import { parseSpeechCatalog, type SpeechCatalog } from '../../src/shared/speech-
 import listed from '../fixtures/speech-models.json'
 
 /**
- * The catalog file from speech.cpp 0.8.1, imported so that tests that mock node:fs can still read it.
+ * The catalog file from speech.cpp 0.10.1, imported so that tests that mock node:fs can still read it.
  */
 export const SPEECH_MODELS_OUTPUT = JSON.stringify(listed)
 

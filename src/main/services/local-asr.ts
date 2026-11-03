@@ -82,15 +82,15 @@ export async function ensureWorker(model: AsrModelSpec): Promise<boolean> {
   if (available(model)) return true
   if (starting && workerModel === model) return starting
   stopWorker()
-  const { localSpeech } = platformCapabilities()
+  const { localAsr } = platformCapabilities()
   // The capabilities leave the local speech recognition out where it does not run, so a start here is a caller's mistake.
-  if (localSpeech.backend === null) throw new Error('the local speech recognition cannot run on this machine')
+  if (localAsr.backend === null) throw new Error('the local speech recognition cannot run on this machine')
   if (!installationStatus(model).modelInstalled) return false
   // speech ships with the app, so a missing one is a broken build rather than something to prepare.
   if (!fs.existsSync(speechPath())) throw new Error(`speech is missing from ${speechPath()}`)
   const started: SpeechWorker = startSpeechWorker(speechPath(), modelFilePath(speechCatalog()[model.model]), [], model.family, {
     task: 'recognition',
-    device: localSpeech.device,
+    device: localAsr.device,
     silence: { ms: ANSWER_TIMEOUT_MS, error: timedOutError },
     onFailure: (error) => {
       if (worker === started) stopWorker(error)
@@ -247,6 +247,7 @@ export function prepare(
   if (preparation) return preparation.operation
   const controller = new AbortController()
   const operation = prepareModelFiles({
+    task: 'asr',
     files: asrModelFiles(model, speechCatalog()),
     label: model.label,
     feature: t('settingsModels.features.speechRecognition'),

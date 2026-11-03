@@ -256,6 +256,7 @@ export interface ListedCredit extends Credit {
 
 /** Who published each speech recognition model that ASIST's file was converted from, and its license, as its model card gives them. */
 const SPEECH_RECOGNITION_SOURCES: Readonly<Record<ResolvedAsrModel, Pick<Credit, 'provider' | 'license'>>> = {
+  'haas-ja-v1.0': { provider: 'Third Intelligence', license: 'Apache-2.0' },
   'qwen3-asr-1.7b': { provider: 'Alibaba Qwen', license: 'Apache-2.0' },
   'qwen3-asr-0.6b': { provider: 'Alibaba Qwen', license: 'Apache-2.0' },
   'parakeet-tdt_ctc-0.6b-ja': { provider: 'NVIDIA', license: 'CC BY 4.0' },

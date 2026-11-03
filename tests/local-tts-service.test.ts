@@ -362,6 +362,7 @@ describe('the start of a worker', () => {
 
   it.each([
     ['another protocol', { ...ready(), protocol: 1 }],
+    ['the previous worker protocol', { ...ready(), protocol: 3 }],
     ['a release of an earlier series', { ...ready(), version: '0.6.2' }],
     ['a model for another task', ready({ task: 'recognition', sample_rate: 16_000 })],
     ['a model on another device than the one asked for', ready({ device: 'CPU' })],

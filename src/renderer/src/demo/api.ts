@@ -95,9 +95,9 @@ const capabilities = demoCapabilities(location.search)
 
 /** The local speech recognition as main reports it on a machine that has not downloaded the model the setting names. */
 function demoAsrStatus(): SetupStatus['asr'] {
-  const { localSpeech } = capabilities
-  if (localSpeech.backend === null) return null
-  const recommendation = recommendAsrModel(localSpeech.backend, localSpeech.memoryGb)
+  const { localAsr } = capabilities
+  if (localAsr.backend === null) return null
+  const recommendation = recommendAsrModel(localAsr.backend, localAsr.memoryGb, localAsr.memoryType)
   const resolvedModel = resolveAsrModel(settings.asrModel, recommendation)
   const spec = asrModelSpec(resolvedModel)
   return {
@@ -105,7 +105,7 @@ function demoAsrStatus(): SetupStatus['asr'] {
     resolvedModel,
     recommendedModel: recommendation.recommendedModel,
     label: spec.label,
-    totalMemoryGb: localSpeech.memoryGb,
+    totalMemoryGb: localAsr.memoryGb,
     modelInstalled: false,
     downloadGb: asrDownloadGb(spec, DEMO_SPEECH_CATALOG, false)
   }

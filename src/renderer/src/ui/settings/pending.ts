@@ -83,17 +83,18 @@ export function pendingItems(input: {
   vap: StatusRead<VapStatus>
   embedding: StatusRead<EmbeddingStatus>
   aizuchiClassifier: StatusRead<AizuchiClassifierStatus>
-  localSpeech: PlatformCapabilities['localSpeech']
+  localTts: PlatformCapabilities['localTts']
+  localAsr: PlatformCapabilities['localAsr']
 }): Pending[] {
-  const { settings, status, vap, embedding, aizuchiClassifier, localSpeech } = input
+  const { settings, status, vap, embedding, aizuchiClassifier, localAsr, localTts } = input
   const pending: Pending[] = []
   // A live engine listens, answers and speaks by itself, so nothing of the cascade engine is in use.
   if (!isLiveEngine(settings.voiceEngine)) {
     const features = conversationFeatures(settings.conversationLocale)
     // The microphone listens through Whisper in the browser when the local model is not ready, so only
     // having neither keeps the conversation from hearing anything.
-    if (cascadeListeningReady(settings, status, localSpeech) === false) pending.push({ kind: localSpeech.backend === null ? 'browserWhisper' : 'recognition' })
-    const speech = speechReadiness(settings.ttsEngine, status, localSpeech)
+    if (cascadeListeningReady(settings, status, localAsr) === false) pending.push({ kind: localAsr.backend === null ? 'browserWhisper' : 'recognition' })
+    const speech = speechReadiness(settings.ttsEngine, status, localTts)
     if (speech === 'missing' || speech === 'cannotRun') pending.push({ kind: 'speech', reason: speech })
     if (features.aizuchi && settings.aizuchi && missing(aizuchiClassifier, (read) => read.runtimeInstalled && read.modelInstalled)) pending.push({ kind: 'aizuchi' })
     if (features.maai && settings.vapEnabled && missing(vap, (read) => read.runtimeInstalled && read.modelsInstalled)) pending.push({ kind: 'turnTaking' })

@@ -11,7 +11,7 @@ sidebar:
 |---|---|---|
 | uv | Astral's releases on GitHub. It is checked by hash before it is bundled. | MIT or Apache-2.0 |
 | git | On a Mac, the source tarball from kernel.org. After a hash check, only the parts needed for local operations are compiled. The source is not modified. On Windows, MinGit as Git for Windows publishes it. After a hash check, it is bundled without the parts ASIST does not use. | GPL-2.0 |
-| speech from speech.cpp | The releases of [nyosegawa/speech.cpp](https://github.com/nyosegawa/speech.cpp) on GitHub. After a hash check, only the executable `speech` is bundled. It runs Qwen3-ASR and the three FastConformer models for speech recognition, and Irodori-TTS and Qwen3-TTS for reading aloud. | MIT |
+| speech from speech.cpp | The releases of [nyosegawa/speech.cpp](https://github.com/nyosegawa/speech.cpp) on GitHub. After a hash check, only the executable `speech` is bundled. It runs Qwen3-ASR and the four FastConformer models including Haas for speech recognition, and Irodori-TTS and Qwen3-TTS for reading aloud. | MIT |
 
 The license texts of all of them are included in the app. For git, the [Release](https://github.com/nyosegawa/asist/releases) of each version of ASIST carries the source tarball of the same git version, and for the git on Windows, the source of the same version of Git for Windows.
 

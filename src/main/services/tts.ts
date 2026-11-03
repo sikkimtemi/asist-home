@@ -141,7 +141,7 @@ function stopProcess(owned: EngineProcess): void {
  */
 export async function state(wanted: boolean, engine: TtsEngine = currentEngine()): Promise<SpeechEngineState> {
   if (engine === 'none') return 'down'
-  const local = isLocalTtsEngine(engine) && ttsEngineRuns(engine, platformCapabilities().localSpeech)
+  const local = isLocalTtsEngine(engine) && ttsEngineRuns(engine, platformCapabilities().localTts)
   return speechEngineState({
     answers: await available(engine),
     starting: engineStarting(engine),
@@ -170,7 +170,7 @@ export function ensureEngine(): Promise<void> {
   const engine = currentEngine()
   // An engine this machine cannot run, such as Qwen3-TTS in settings brought from another machine, is
   // never started; reading with it fails with the reason instead.
-  const runs = ttsEngineRuns(engine, platformCapabilities().localSpeech)
+  const runs = ttsEngineRuns(engine, platformCapabilities().localTts)
   if (!runs || !isLocalTtsEngine(engine)) localTts.stop()
   for (const [other, owned] of processes) if (other !== engine) stopProcess(owned)
   if (!runs) return Promise.resolve()
@@ -271,7 +271,7 @@ export async function resolveVoice(settings: AppSettings = getSettings(), locale
   const engine = settings.ttsEngine
   if (engine === 'none') throw new Error(errorText('voice.speech.noSpeech'))
   if (engine === 'system') return { engine: 'system' }
-  if (!ttsEngineRuns(engine, platformCapabilities().localSpeech)) {
+  if (!ttsEngineRuns(engine, platformCapabilities().localTts)) {
     throw new Error(errorText('voice.speech.cannotRunHere', { engine: engineLabel(engine) }))
   }
   if (engine === 'irodori') {

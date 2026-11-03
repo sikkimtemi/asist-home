@@ -173,8 +173,8 @@ export function ttsEngineSpeaks(locale: ConversationLocale, engine: TtsEngine): 
  * is read by Irodori-TTS and another language by Qwen3-TTS when it speaks it. Elsewhere Japanese starts on
  * VOICEVOX, which the setup offers to install, and every other language on the OS's voice, which works at once.
  */
-export function defaultTtsEngine(locale: ConversationLocale, localSpeech: PlatformCapabilities['localSpeech']): TtsEngine {
-  const local = recommendLocalTts(localSpeech)
+export function defaultTtsEngine(locale: ConversationLocale, localTts: PlatformCapabilities['localTts']): TtsEngine {
+  const local = recommendLocalTts(localTts)
   if (locale === 'ja-JP') return local ? 'irodori' : 'voicevox'
   return local && conversationFeatures(locale).qwenTts ? 'qwen3tts' : 'system'
 }

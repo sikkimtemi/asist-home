@@ -43,6 +43,16 @@ export const WINDOWS_WITHOUT_GPU = deriveCapabilities({
   micCancelsEcho: () => false
 })
 
+/** A Windows HM90 with an integrated Vulkan GPU whose memory is shared with the CPU. */
+export const WINDOWS_INTEGRATED = deriveCapabilities({
+  platform: 'win32', arch: 'x64', totalMemoryBytes: 33736630272,
+  speechDevices: () => [
+    { name: 'Vulkan0', description: 'AMD Radeon(TM) Graphics', kind: 'igpu', memoryTotal: 17135828992 },
+    { name: 'CPU', description: 'AMD Ryzen 9 4900H with Radeon Graphics', kind: 'cpu', memoryTotal: 33736630272 }
+  ],
+  micCancelsEcho: () => false
+})
+
 /**
  * The fixture of the system the tests run on, for tests that run its real git or uv. Main's own
  * capabilities would run the speech worker and open the real microphone on Windows.

@@ -41,7 +41,7 @@ afterEach(() => {
 })
 
 describe('settings persistence', () => {
-  it.each(['gpt-5.6-terra', 'gpt-6.1-sol'])('keeps saved %s and its reasoning effort across reloads and unrelated edits', async (id) => {
+  it.each(['gpt-5.6-terra', 'gpt-6.1-terra'])('keeps saved %s and its reasoning effort across reloads and unrelated edits', async (id) => {
     const model = { provider: 'chatgpt' as const, id, effort: 'high' as const }
     const { saveSettings } = await import('../src/main/services/settings')
     saveSettings({ conversationModel: model, bridgeModel: { provider: 'chatgpt', id: 'gpt-5.6-luna' } })

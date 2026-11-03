@@ -41,7 +41,7 @@ Irodori-TTS のモデルカードは、本人の同意なしに声を複製し�
 | 用途 | モデル | 提供元 |
 |---|---|---|
 | 会話、つなぎの一言、履歴の要約 | Claude Sonnet 5、Claude Haiku 4.5、Claude Opus 5 | Anthropic |
-| 同上 | GPT-6 Luna、GPT-6 Sol、GPT-6 Astra、GPT-6.1 Terra、GPT-6.1 Sol、GPT-5.6 Luna、GPT-5.6 Terra、GPT-5.6 Sol | OpenAI |
+| 同上 | GPT-5.6 Luna、GPT-5.6 Terra、GPT-6 Luna、GPT-6.1 Terra | OpenAI |
 | 同上 | 上と同じモデルのうち、アカウントが使えるもの(ChatGPT のプランで) | ChatGPT(OpenAI) |
 | 同上 | Gemini 3.8 Flash、Gemini 3.5 Flash Lite | Google |
 | 同上 | Qwen 3.8 27B、GPT OSS 120B | Cerebras |

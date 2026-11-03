@@ -67,7 +67,7 @@ beforeEach(() => {
 })
 
 describe('a conversation request on the ChatGPT plan', () => {
-  it.each(['gpt-6-luna', 'gpt-6-sol', 'gpt-6-astra', 'gpt-6.1-terra', 'gpt-6.1-sol'])(
+  it.each(['gpt-6-luna', 'gpt-6.1-terra'])(
     'streams %s with its selected reasoning effort and tool namespace', async (id) => {
       const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
       const result = await chatgptAdapter.stream(request({ model: { provider: 'chatgpt', id, effort: 'max' } }), credential('access-1')).final()
@@ -180,7 +180,22 @@ describe('a one-shot JSON request on the ChatGPT plan', () => {
 })
 
 describe('checking a model on the ChatGPT plan', () => {
-  it.each(['gpt-5.6-terra', 'gpt-6.1-terra', 'gpt-6.1-sol', 'gpt-6-luna'])('accepts listed %s and refuses a hidden model', async (id) => {
+  it('validates both defaults for an account that has only the legacy Terra and Luna models', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      models: ['gpt-5.6-terra', 'gpt-5.6-luna'].map((slug) => ({ slug, visibility: 'list' }))
+    }), { status: 200 })))
+    try {
+      const { defaultModelsFor } = await import('@shared/llm-catalog')
+      const { chatgptAdapter } = await import('../src/main/services/llm/chatgpt')
+      for (const model of Object.values(defaultModelsFor('chatgpt'))) {
+        await expect(chatgptAdapter.retrieveModel(model.id, credential('access-1'), new AbortController().signal)).resolves.toBeUndefined()
+      }
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it.each(['gpt-5.6-terra', 'gpt-6.1-terra', 'gpt-6-luna'])('accepts listed %s and refuses a hidden model', async (id) => {
     const fetchMock = vi.fn(async () =>
       new Response(JSON.stringify({ models: [{ slug: id, visibility: 'list' }, { slug: 'gpt-reserve', visibility: 'hide' }] }), { status: 200 })
     )

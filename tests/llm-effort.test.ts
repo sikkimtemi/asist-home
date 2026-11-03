@@ -7,7 +7,7 @@ describe('how the reasoning effort is decided', () => {
     expect(effortFor({ provider: 'anthropic', id: 'claude-sonnet-5' })).toBe('low')
     expect(effortFor({ provider: 'anthropic', id: 'claude-opus-5' })).toBe('low')
     expect(effortFor({ provider: 'anthropic', id: 'claude-haiku-4-5' })).toBeNull()
-    expect(effortFor({ provider: 'openai', id: 'gpt-5.6-sol' })).toBe('low')
+    expect(effortFor({ provider: 'openai', id: 'gpt-5.6-terra' })).toBe('low')
     for (const model of CONVERSATION_MODELS) {
       expect(model.defaultEffort === null).toBe(model.efforts.length === 0)
       if (model.defaultEffort) expect(model.efforts).toContain(model.defaultEffort)
@@ -24,7 +24,7 @@ describe('how the reasoning effort is decided', () => {
     )
   })
   it.each(['openai', 'chatgpt'] as const)('accepts deeper reasoning on GPT-6 models from %s without expanding GPT-5.6 choices', (provider) => {
-    for (const id of ['gpt-6-luna', 'gpt-6-sol', 'gpt-6-astra', 'gpt-6.1-terra', 'gpt-6.1-sol']) {
+    for (const id of ['gpt-6-luna', 'gpt-6.1-terra']) {
       expect(effortFor({ provider, id, effort: 'xhigh' })).toBe('xhigh')
       expect(effortFor({ provider, id, effort: 'max' })).toBe('max')
     }

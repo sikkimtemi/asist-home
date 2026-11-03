@@ -105,20 +105,12 @@ export const CONVERSATION_MODELS: readonly CatalogModel[] = [
   { provider: 'anthropic', id: 'claude-opus-5', label: 'Claude Opus 5', note: 'llmModels.notes.mostCapable', efforts: ANTHROPIC_EFFORTS, defaultEffort: 'low' },
   { provider: 'openai', id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', note: 'llmModels.notes.light', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'openai', id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', note: 'llmModels.notes.standard', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
-  { provider: 'openai', id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', note: 'llmModels.notes.mostCapable', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'openai', id: 'gpt-6-luna', label: 'GPT-6 Luna', note: 'llmModels.notes.light', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'openai', id: 'gpt-6-sol', label: 'GPT-6 Sol', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'openai', id: 'gpt-6-astra', label: 'GPT-6 Astra', note: 'llmModels.notes.mostCapable', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
   { provider: 'openai', id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'openai', id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
   { provider: 'chatgpt', id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', note: 'llmModels.notes.light', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'chatgpt', id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', note: 'llmModels.notes.standard', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
-  { provider: 'chatgpt', id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', note: 'llmModels.notes.mostCapable', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'chatgpt', id: 'gpt-6-luna', label: 'GPT-6 Luna', note: 'llmModels.notes.light', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'chatgpt', id: 'gpt-6-sol', label: 'GPT-6 Sol', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'chatgpt', id: 'gpt-6-astra', label: 'GPT-6 Astra', note: 'llmModels.notes.mostCapable', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
   { provider: 'chatgpt', id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
-  { provider: 'chatgpt', id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', note: 'llmModels.notes.standard', efforts: GPT_6_EFFORTS, defaultEffort: 'low' },
   { provider: 'google', id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', note: 'llmModels.notes.standard', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'google', id: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Flash Lite', note: 'llmModels.notes.light', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
   { provider: 'cerebras', id: 'qwen-3.8-27b', label: 'Qwen 3.8 27B', note: 'llmModels.notes.cerebrasSpeed', efforts: LOW_TO_HIGH_EFFORTS, defaultEffort: 'low' },
@@ -134,8 +126,8 @@ export const CONVERSATION_MODELS: readonly CatalogModel[] = [
  */
 export const PROVIDER_DEFAULT_MODELS: Record<LlmProvider, { conversation: string; bridge: string }> = {
   anthropic: { conversation: 'claude-sonnet-5', bridge: 'claude-haiku-4-5' },
-  openai: { conversation: 'gpt-6.1-terra', bridge: 'gpt-6-luna' },
-  chatgpt: { conversation: 'gpt-6.1-terra', bridge: 'gpt-6-luna' },
+  openai: { conversation: 'gpt-5.6-terra', bridge: 'gpt-5.6-luna' },
+  chatgpt: { conversation: 'gpt-5.6-terra', bridge: 'gpt-5.6-luna' },
   google: { conversation: 'gemini-3.8-flash', bridge: 'gemini-3.5-flash-lite' },
   cerebras: { conversation: 'qwen-3.8-27b', bridge: 'qwen-3.8-27b' }
 }

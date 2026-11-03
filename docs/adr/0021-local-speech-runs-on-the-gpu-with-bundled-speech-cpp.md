@@ -31,7 +31,7 @@ macOS でも Windows でも、ローカルの音声認識の Qwen3-ASR と FastC
 
 ## 分かっている制約
 
-- 単体の GPU が無い Windows のマシンでは、ローカルの音声認識と読み上げ(Qwen3-TTS と Irodori-TTS)を使えない。
+- 単体の GPU が無い Windows のマシンでは、ローカルの読み上げ(Qwen3-TTS と Irodori-TTS)を使えない。ローカルの音声認識は、Vulkan が使える統合 GPU でも利用できる。
 - 新しい版のアプリや GPU のドライバーを入れたあとの最初の起動では、Mac では Metal のカーネルを、Windows では Vulkan のシェーダーを組み立てるので、その回だけ準備が長くなる。
 - 同梱した相槌の音声は Qwen3-TTS 0.6B で作ったもので、1.7B で読み上げるときも同じものを鳴らす。
 - speech.cpp は ASIST のために作ったもので、Qwen3-ASR、Qwen3-TTS、Irodori-TTS の新しい版には自分で追従する。
